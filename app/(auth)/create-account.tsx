@@ -1,9 +1,11 @@
 import { Text, View, TextInput, StyleSheet, Alert } from "react-native";
 import { useRef } from "react";
-import { AuthStore, appSignUp } from "../../firebase";
+import { useAuth } from "../context/auth";
 import { Stack, useRouter } from "expo-router";
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 export default function CreateAccount() {
+  const { signUp } = useAuth();
   const router = useRouter();
   const emailRef = useRef("");
   const firstNameRef = useRef("");
@@ -61,35 +63,36 @@ export default function CreateAccount() {
         />
       </View>
 
-      <Text
-        style={{ marginBottom: 8 }}
-        onPress={async () => {
-          const resp = await appSignUp(
-            emailRef.current,
-            passwordRef.current,
-            firstNameRef.current + " " + lastNameRef.current
-          );
-          if (resp?.user) {
-            router.replace("/(tabs)/home");
-          } else {
-            console.log(resp.error);
-            // Alert.alert("Sign Up Error", resp?.error);
-          }
-        }}
-      >
-        SAVE NEW USER
-      </Text>
+      <TouchableOpacity>
+        <Text
+          style={{ marginBottom: 8 }}
+          onPress={async () => {
+            const { data, error } = await signUp(
+              emailRef.current,
+              passwordRef.current,
+              firstNameRef.current + " " + lastNameRef.current
+            );
+            if (data) {
+              router.replace("/");
+            } else {
+              console.log(error);
+            }
+          }}
+        >
+          SAVE NEW USER
+        </Text>
+      </TouchableOpacity>
 
-      <Text
-        onPress={() => {
-          AuthStore.update((s) => {
-            s.isLoggedIn = false;
-          });
-          router.back();
-        }}
-      >
-        CANCEL
-      </Text>
+      <View style={{ marginTop: 32 }}>
+        <Text
+          style={{ fontWeight: "500" }}
+          onPress={() => router.replace("/login")}
+        >
+          Click Here To Return To Sign In Page
+        </Text>
+      </View>
+
+
     </View>
   );
 }

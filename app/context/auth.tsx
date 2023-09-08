@@ -81,10 +81,10 @@ export function Provider(props: ProviderProps) {
         !inAuthGroup
       ) {
         // Redirect to the sign-in page.
-        router.push("/login");
+        router.push("/(auth)/login");
       } else if (user && inAuthGroup) {
         // Redirect away from the sign-in page.
-        router.push("/");
+        router.push("/(tabs)/home");
       }
     }, [user, segments, authInitialized, isNavigationReady]);
   };
