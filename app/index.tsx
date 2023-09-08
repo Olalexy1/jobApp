@@ -1,68 +1,45 @@
-// import { Redirect } from "expo-router";
+import { Redirect } from "expo-router";
 
-// export default function Index() {
-//     return <Redirect href="/home" />;
-// }
+export default function Index() {
+  return <Redirect href="/(tabs)/home" />;
+}
 
-import { useState } from "react";
-import { SafeAreaView, ScrollView, View } from "react-native";
-import { Stack, useRouter } from "expo-router";
+// import { useRootNavigationState } from "expo-router";
+// import { useRouter, useSegments } from "expo-router";
+// import { AuthStore } from "../firebase";
+// import React, { useState } from "react";
+// import { ActivityIndicator, Text, View } from "react-native";
 
-import { COLORS, icons, images, SIZES } from "../constants";
-import {
-  NearByJobs,
-  PopularJobs,
-  ScreenHeaderBtn,
-  Welcome,
-} from "../components";
+// const { initialized, isLoggedIn, user } = AuthStore.useState();
 
-const Home = () => {
-  const router = useRouter()
-  const [searchTerm, setSearchTerm] = useState("");
+// const Index = (user: any) => {
 
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.lightWhite }}>
-      <Stack.Screen
-        options={{
-          headerStyle: { backgroundColor: COLORS.lightWhite },
-          headerShadowVisible: false,
-          headerLeft: () => (
-            <ScreenHeaderBtn iconUrl={icons.menu} dimension='60%' handlePress={function (): void {
-              throw new Error("Function not implemented.");
-            } } />
-          ),
-          headerRight: () => (
-            <ScreenHeaderBtn iconUrl={images.profile} dimension='100%' handlePress={function (): void {
-              throw new Error("Function not implemented.");
-            } } />
-          ),
-          headerTitle: "",
-        }}
-      />
+//   const segments = useSegments();
+//   const router = useRouter();
 
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View
-          style={{
-            flex: 1,
-            padding: SIZES.medium,
-          }}
-        >
-          <Welcome
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            handleClick={() => {
-              if (searchTerm) {
-                router.push(`/search/${searchTerm}`)
-              }
-            }}
-          />
+//   const navigationState = useRootNavigationState();
 
-          <PopularJobs />
-          <NearByJobs />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-};
+//   console.log(isLoggedIn, 'isLoggedIn')
 
-export default Home;
+//   React.useEffect(() => {
+//     if (!navigationState?.key || !initialized) return;
+
+//     const inAuthGroup = segments[0] === "(auth)";
+
+//     if (
+//       // If the user is not signed in and the initial segment is not anything
+//       //  segment is not anything in the auth group.
+//       !user &&
+//       !inAuthGroup
+//     ) {
+//       // Redirect to the login page.
+//       router.replace("/login");
+//     } else if (user && inAuthGroup) {
+//       // go to tabs root.
+//       router.replace("/(tabs)/home");
+//     }
+//   }, [user, segments]);
+
+//   // return <View>{!navigationState?.key ?  <ActivityIndicator size='large' color={COLORS.primary} /> : <></>}</View>;
+// };
+// export default Index

@@ -5,7 +5,7 @@ import styles from "./screenheader.style";
 interface ScreenHeaderBtnProps {
   iconUrl: ImageSourcePropType;
   dimension: string;
-  handlePress: () => void;
+  handlePress?: () => void;
 }
 
 const ScreenHeaderBtn: React.FC<ScreenHeaderBtnProps> = ({ iconUrl, dimension, handlePress }) => {
