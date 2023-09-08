@@ -1,4 +1,4 @@
-import { Text, View, TextInput, StyleSheet, Alert } from "react-native";
+import { Text, View, TextInput, StyleSheet, Alert, TouchableOpacity } from "react-native";
 import { AuthStore, appSignIn } from "../../firebase";
 import { Stack, useRouter } from "expo-router";
 import { useRef } from "react";
@@ -34,24 +34,23 @@ export default function LogIn() {
           style={styles.textInput}
         />
       </View>
-      <Text
-        onPress={async () => {
-          const resp = await appSignIn(emailRef.current, passwordRef.current);
-          if (resp?.user) {
-            router.replace("/(tabs)/home/");
-          } else {
-            console.log(resp.error)
-            Alert.alert("Login Error", resp.error?.message)
-          }
-        }}
-      >
-        Login
-      </Text>
+      <TouchableOpacity>
+        <Text
+          onPress={async () => {
+            const resp = await appSignIn(emailRef.current, passwordRef.current);
+            if (resp?.user) {
+              router.replace("/");
+            } else {
+              console.log(resp.error)
+              Alert.alert("Login Error", resp.error?.message)
+            }
+          }}
+        >
+          Login
+        </Text>
+      </TouchableOpacity>
       <Text
         onPress={() => {
-          AuthStore.update((s) => {
-            s.isLoggedIn = true;
-          });
           router.push("/create-account");
         }}
       >

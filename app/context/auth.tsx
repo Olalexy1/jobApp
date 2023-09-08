@@ -90,19 +90,6 @@ export function Provider(props: ProviderProps) {
   };
 
   useEffect(() => {
-    // (async () => {
-    //   try {
-    //     const user = await appwrite.account.get();
-    //     console.log(user);
-    //     setAuth(user);
-    //   } catch (error) {
-    //     console.log("error", error);
-    //     setAuth(null);
-    //   }
-
-    //   setAuthInitialized(true);
-    //   console.log("initialize ", user);
-    // })();
     const auth = getAuth();
     onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -116,7 +103,7 @@ export function Provider(props: ProviderProps) {
         setAuth(null);
       }
     });
-  }, []);
+  }, [user]); //Check here
 
   const appSignOut = async (): Promise<SignOutResponse> => {
     try {

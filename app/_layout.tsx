@@ -1,5 +1,4 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { SplashScreen, Stack } from 'expo-router';
@@ -7,16 +6,12 @@ import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 import { store } from './store';
 import { Provider } from 'react-redux';
+import { Provider as AuthProvider, useAuth } from "./context/auth";
 
 export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,
 } from 'expo-router';
-
-// export const unstable_settings = {
-//   // Ensure that reloading on any route keeps a back button present.
-//   initialRouteName: 'home',
-// };
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
@@ -35,8 +30,6 @@ export default function RootLayout() {
     ...FontAwesome.font,
   });
 
-  const colorScheme = useColorScheme();
-
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     if (error) throw error;
@@ -52,40 +45,30 @@ export default function RootLayout() {
     return null;
   }
 
-  // return (
-  //   <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-  //     <Stack initialRouteName='home'>
-  //       <Stack.Screen name="home" />
-  //       <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-  //     </Stack>
-  //   </ThemeProvider>
-  // );
-
-  // return (
-  //   <Provider store={store}>
-  //     <Stack initialRouteName="home">
-  //       <Stack.Screen name="home" />
-  //     </Stack>
-  //   </Provider>
-  // )
-
-  return <RootLayoutNav />;
+  return (
+    <AuthProvider>
+      <Provider store={store}>
+        <RootLayoutNav />
+      </Provider>
+    </AuthProvider>
+  )
 }
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
+  const { authInitialized, user } = useAuth();
+
+  if (!authInitialized && !user) return null;
 
   return (
-    <Provider store={store}>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack
         screenOptions={{
+          headerShown: false
         }}>
-        {/* <Stack.Screen name="(auth)" options={{ headerShown: false }} /> */}
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        {/* <Stack.Screen name="modal" options={{ presentation: 'modal' }} /> */}
+        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
       </Stack>
-      </ThemeProvider>
-    </Provider>
+    </ThemeProvider>
   );
 }
