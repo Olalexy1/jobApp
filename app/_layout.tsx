@@ -15,7 +15,7 @@ export {
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(tabs)',
+  initialRouteName: '(tabs)/home',
 };
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -46,22 +46,25 @@ export default function RootLayout() {
   }
 
   return (
-    <AuthProvider>
+    // <AuthProvider>
       <Provider store={store}>
         <RootLayoutNav />
       </Provider>
-    </AuthProvider>
+    // </AuthProvider>
   )
 }
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
-  const { authInitialized, user } = useAuth();
+  // const { authInitialized, user } = useAuth();
 
-  if (!authInitialized && !user) return null;
+  // console.log("authInitialized:", authInitialized);
+  // console.log("user:", user);
+
+  // if (!authInitialized && !user) return null;
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    // <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack
         screenOptions={{
           headerShown: false
@@ -69,6 +72,6 @@ function RootLayoutNav() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
       </Stack>
-    </ThemeProvider>
+    // </ThemeProvider>
   );
 }

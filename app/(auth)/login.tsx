@@ -1,11 +1,11 @@
 import { Text, View, TextInput, StyleSheet, Alert, TouchableOpacity } from "react-native";
-// import { AuthStore, appSignIn } from "../../firebase";
 import { Stack, useRouter } from "expo-router";
 import { useRef } from "react";
 import { useAuth } from "../context/auth";
+import { AuthStore, appSignIn } from "../../firebase";
 
-export default function LogIn() {
-  const { signIn } = useAuth();
+export default function Login() {
+  // const { signIn } = useAuth();
   const router = useRouter();
   const emailRef = useRef("");
   const passwordRef = useRef("");
@@ -39,11 +39,11 @@ export default function LogIn() {
       <TouchableOpacity>
         <Text
           onPress={async () => {
-            const { data, error } = await signIn(emailRef.current, passwordRef.current);
-            if (data) {
+            const resp = await appSignIn(emailRef.current, passwordRef.current);
+            if (resp?.user) {
               router.replace("/");
             } else {
-              console.log(error)
+              console.log(resp?.error)
             }
           }}
         >
@@ -52,6 +52,9 @@ export default function LogIn() {
       </TouchableOpacity>
       <Text
         onPress={() => {
+          AuthStore.update((s) => {
+            s.isLoggedIn = true;
+          });
           router.push("/create-account");
         }}
       >

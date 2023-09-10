@@ -2,27 +2,33 @@ import { Alert, Button, StyleSheet } from 'react-native';
 import { Redirect, Stack, useRouter } from "expo-router";
 import { Text, View } from '../../../components/Themed';
 import { useAuth } from "../../context/auth";
-import { TouchEventType } from 'react-native-gesture-handler/lib/typescript/TouchEventType';
+import { AuthStore, appSignOut } from "../../../firebase";
 import { Touchable } from 'react-native';
 
 export default function Settings() {
-  const { user, signOut } = useAuth()
+  // const { user, signOut } = useAuth()
   const router = useRouter();
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: true, title: "Settings" }} />
       <Text style={styles.title}>Settings Page</Text>
-      <Text style={styles.title}>
+      {/* <Text style={styles.title}>
         {user?.displayName}
       </Text>
       <Text style={styles.title}>
         {user?.email}
+      </Text> */}
+       <Text style={styles.title}>
+        {AuthStore.getRawState().user?.email}
+      </Text>
+      <Text style={styles.title}>
+        {AuthStore.getRawState().user?.displayName}
       </Text>
       <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
 
       <Button
         onPress={async () => {
-          const resp = await signOut();
+          const resp = await appSignOut();
           if (!resp?.error) {
             router.replace("/(auth)/login");
           } else {

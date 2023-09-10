@@ -44,7 +44,8 @@ const AuthContext = React.createContext<AuthContextValue | undefined>(
 export function Provider(props: ProviderProps) {
   const [user, setAuth] =
     React.useState<User | null>(null);
-  const [authInitialized, setAuthInitialized] = React.useState<boolean>(false);
+  // const [authInitialized, setAuthInitialized] = React.useState<boolean>(false);
+  const [authInitialized, setAuthInitialized] = useState(false);
 
   // This hook will protect the route access based on user authentication.
   const useProtectedRoute = (user: User | null) => {
@@ -73,6 +74,8 @@ export function Provider(props: ProviderProps) {
 
       const inAuthGroup = segments[0] === "(auth)";
 
+      console.log(authInitialized, " The second useEffect state")
+
       if (!authInitialized) return;
 
       if (
@@ -81,36 +84,72 @@ export function Provider(props: ProviderProps) {
         !inAuthGroup
       ) {
         // Redirect to the sign-in page.
+        console.log("This app does not have a user")
+
         router.push("/(auth)/login");
+        // router.push("/(auth)/login")
       } else if (user && inAuthGroup) {
+        console.log(user, "This App has a user")
         // Redirect away from the sign-in page.
         router.push("/(tabs)/home");
       }
     }, [user, segments, authInitialized, isNavigationReady]);
   };
 
+  // useEffect(() => {
+  //   onAuthStateChanged(auth, (user) => {
+  //     // try {
+  //     if (user) {
+  //       // User is signed in, see docs for a list of available properties
+  //       // https://firebase.google.com/docs/reference/js/auth.user
+  //       const uid = user.uid;
+  //       setAuth(user);
+  //       setAuthInitialized(true);
+  //       console.log("initializedddd", authInitialized, user);
+  //       // ...
+  //     }
+  //     else {
+  //       // User is signed out
+  //       setAuth(null);
+  //     }
+
+  //     setAuthInitialized(true);
+  //     // } catch (error) {
+  //     //   console.log('Error', error);
+  //     //   setAuth(null)
+  //     // }
+  //   });
+  // }, []); //Check here
+
+
+
+
   useEffect(() => {
-    const auth = getAuth();
-    onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // User is signed in, see docs for a list of available properties
-        // https://firebase.google.com/docs/reference/js/auth.user
+        // User is signed in
         const uid = user.uid;
         setAuth(user);
-        // ...
+        setAuthInitialized(true);
       } else {
         // User is signed out
         setAuth(null);
+        setAuthInitialized(true);
       }
     });
-  }, [user]); //Check here
+
+    return () => {
+      // Cleanup by unsubscribing from the listener when the component unmounts
+      unsubscribe();
+    }
+  }, [user]); // Empty dependency array to run only once
 
   const appSignOut = async (): Promise<SignOutResponse> => {
     try {
       await signOut(auth);
       return { data: null, error: null };
     } catch (e) {
-      return { data: null,  error: e };
+      return { data: null, error: e };
     } finally {
       setAuth(null)
     }
@@ -123,7 +162,7 @@ export function Provider(props: ProviderProps) {
       return { data: auth.currentUser, error: null };
     } catch (e) {
       setAuth(null)
-      return { data: null, error: e as Error};
+      return { data: null, error: e as Error };
     }
   };
 
@@ -140,7 +179,7 @@ export function Provider(props: ProviderProps) {
       return { data: auth.currentUser, error: null };
     } catch (e) {
       setAuth(null);
-      return { data: null, error: e  as Error};
+      return { data: null, error: e as Error };
     }
   };
 

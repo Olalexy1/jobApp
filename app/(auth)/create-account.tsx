@@ -1,11 +1,12 @@
 import { Text, View, TextInput, StyleSheet, Alert } from "react-native";
 import { useRef } from "react";
 import { useAuth } from "../context/auth";
+import { AuthStore, appSignUp } from "../../firebase";
 import { Stack, useRouter } from "expo-router";
 import { TouchableOpacity } from "react-native-gesture-handler";
 
 export default function CreateAccount() {
-  const { signUp } = useAuth();
+  // const { signUp } = useAuth();
   const router = useRouter();
   const emailRef = useRef("");
   const firstNameRef = useRef("");
@@ -67,21 +68,32 @@ export default function CreateAccount() {
         <Text
           style={{ marginBottom: 8 }}
           onPress={async () => {
-            const { data, error } = await signUp(
+            const resp = await appSignUp(
               emailRef.current,
               passwordRef.current,
               firstNameRef.current + " " + lastNameRef.current
             );
-            if (data) {
+            if (resp?.user) {
               router.replace("/");
             } else {
-              console.log(error);
+              console.log(resp?.user);
             }
           }}
         >
-          SAVE NEW USER
+          Save New User
         </Text>
       </TouchableOpacity>
+
+      <Text
+        onPress={() => {
+          AuthStore.update((s) => {
+            s.isLoggedIn = false;
+          });
+          router.back();
+        }}
+      >
+        CANCEL
+      </Text>
 
       <View style={{ marginTop: 32 }}>
         <Text
