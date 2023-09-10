@@ -1,13 +1,40 @@
-import { Alert, Button, StyleSheet } from 'react-native';
-import { Redirect, Stack, useRouter } from "expo-router";
+import { Alert, Button, StyleSheet, BackHandler } from 'react-native';
+import { Redirect, Stack, useRouter, useNavigation } from "expo-router";
 import { Text, View } from '../../../components/Themed';
 import { useAuth } from "../../context/auth";
 import { AuthStore, appSignOut } from "../../../firebase";
 import { Touchable } from 'react-native';
+import { useEffect } from 'react';
 
 export default function Settings() {
   // const { user, signOut } = useAuth()
   const router = useRouter();
+
+  // Navigation
+  const navigation = useNavigation();
+
+  // Effect
+  useEffect(() => {
+    navigation.addListener('beforeRemove', (e) => {
+      e.preventDefault();
+      Alert.alert("Cannot go back from here. Sign in again")
+      navigation.dispatch(e.data.action);
+    });
+  }, []);
+
+  useEffect(() => {
+    const handleBackPress = () => {
+      BackHandler.exitApp();
+      return true;
+    };
+
+    BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
+    };
+  }, []); // Empty dependency array means this effect runs once
+
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: true, title: "Settings" }} />
@@ -18,7 +45,7 @@ export default function Settings() {
       <Text style={styles.title}>
         {user?.email}
       </Text> */}
-       <Text style={styles.title}>
+      <Text style={styles.title}>
         {AuthStore.getRawState().user?.email}
       </Text>
       <Text style={styles.title}>
