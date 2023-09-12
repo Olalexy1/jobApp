@@ -7,6 +7,7 @@ import { useColorScheme } from 'react-native';
 import { store } from './store';
 import { Provider } from 'react-redux';
 import { Provider as AuthProvider, useAuth } from "./context/auth";
+import { NativeBaseProvider, Box } from "native-base";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -47,9 +48,9 @@ export default function RootLayout() {
 
   return (
     // <AuthProvider>
-      <Provider store={store}>
-        <RootLayoutNav />
-      </Provider>
+    <Provider store={store}>
+      <RootLayoutNav />
+    </Provider>
     // </AuthProvider>
   )
 }
@@ -64,7 +65,7 @@ function RootLayoutNav() {
   // if (!authInitialized && !user) return null;
 
   return (
-    // <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <NativeBaseProvider>
       <Stack
         screenOptions={{
           headerShown: false
@@ -72,6 +73,6 @@ function RootLayoutNav() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
       </Stack>
-    // </ThemeProvider>
+    </NativeBaseProvider>
   );
 }
