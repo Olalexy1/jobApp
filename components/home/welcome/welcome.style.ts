@@ -11,6 +11,8 @@ export type Styles = {
 const styles = StyleSheet.create<Styles | any>({
   container: {
     width: "100%",
+    flexDirection: 'row',
+    justifyContent:'space-between'
   },
   userName: {
     fontFamily: FONT.regular,

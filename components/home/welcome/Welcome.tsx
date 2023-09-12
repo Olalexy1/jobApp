@@ -8,9 +8,11 @@ import {
   FlatList,
 } from "react-native";
 import { useRouter } from "expo-router";
-
+import { AuthStore } from "../../../firebase";
 import styles from "./welcome.style";
 import { icons, SIZES } from "../../../constants";
+import AvatarBtn from "../../common/avatar/avatar";
+import { avatarLetters } from "../../../utils";
 
 const jobTypes = ["Full-time", "Part-time", "Contractor", "Intern"];
 
@@ -23,12 +25,17 @@ interface WelcomeProps {
 const Welcome: React.FC<WelcomeProps> = ({ searchTerm, setSearchTerm, handleClick }) => {
   const router = useRouter();
   const [activeJobType, setActiveJobType] = useState("Full-time");
+  const avatar = AuthStore.getRawState().user?.displayName?.toString()
+  const letterAvatar = avatarLetters(avatar)
 
   return (
     <View>
       <View style={styles.container}>
-        <Text style={styles.userName}>Hello Adrian</Text>
-        <Text style={styles.welcomeMessage}>Find your perfect job</Text>
+        <View>
+          <Text style={styles.userName}>Hello {AuthStore.getRawState().user?.displayName}</Text>
+          <Text style={styles.welcomeMessage}>Find your perfect job</Text>
+        </View>
+        <AvatarBtn avatar={letterAvatar} />
       </View>
 
       <View style={styles.searchContainer}>

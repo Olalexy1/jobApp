@@ -1,41 +1,42 @@
 import { useState } from "react";
-import { SafeAreaView, ScrollView, View } from "react-native";
+import { SafeAreaView, ScrollView, View, StyleSheet, Platform } from "react-native";
 import { Stack, useRouter } from "expo-router";
 
-import { COLORS, icons, images, SIZES } from "../../../constants";
+import { COLORS, SIZES } from "../../../constants";
 import {
   NearByJobs,
   PopularJobs,
   ScreenHeaderBtn,
   Welcome,
+  AvatarBtn
 } from "../../../components";
+
+import { avatarLetters } from "../../../utils";
+import { AuthStore } from "../../../firebase";
 
 const Home = () => {
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState("");
+  const avatar = AuthStore.getRawState().user?.displayName?.toString()
+  const letterAvatar = avatarLetters(avatar)
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.lightWhite }}>
+    <SafeAreaView style={styles.container}>
       <Stack.Screen
         options={{
           headerStyle: { backgroundColor: COLORS.lightWhite },
           headerShadowVisible: false,
-          headerLeft: () => (
-            <ScreenHeaderBtn iconUrl={icons.menu} dimension='60%' />
-          ),
-          headerRight: () => (
-            <ScreenHeaderBtn iconUrl={images.profile} dimension='100%' />
-          ),
-          headerTitle: "",
+          // headerLeft: () => (
+          //   <AvatarBtn avatar={letterAvatar}/>
+          // ),
+          // headerTitle: "",
+          headerShown: false
         }}
       />
 
       <ScrollView showsVerticalScrollIndicator={false}>
         <View
-          style={{
-            flex: 1,
-            padding: SIZES.medium,
-          }}
+          style={styles.scrollInnerContainer}
         >
           <Welcome
             searchTerm={searchTerm}
@@ -53,5 +54,21 @@ const Home = () => {
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.lightWhite,
+    ...Platform.select({
+      android: {
+        paddingTop: 25, 
+      },
+    }),
+  },
+  scrollInnerContainer: {
+    flex: 1,
+    padding: SIZES.medium
+  }
+});
 
 export default Home;

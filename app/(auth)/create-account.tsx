@@ -1,9 +1,11 @@
-import { Text, View, TextInput, StyleSheet, Alert } from "react-native";
-import { useRef } from "react";
-import { useAuth } from "../context/auth";
+import { Text, View, TextInput, StyleSheet, Alert, TouchableOpacity, Image } from "react-native";
+import { useRef, useState } from "react";
+// import { useAuth } from "../context/auth";
 import { AuthStore, appSignUp } from "../../firebase";
+import { Input, Icon } from '@rneui/themed';
 import { Stack, useRouter } from "expo-router";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import { COLORS, FONT, SIZES } from "../../constants";
+import { useToast } from 'native-base';
 
 export default function CreateAccount() {
   // const { signUp } = useAuth();
@@ -12,115 +14,185 @@ export default function CreateAccount() {
   const firstNameRef = useRef("");
   const lastNameRef = useRef("");
   const passwordRef = useRef("");
+  const [show, setShow] = useState(false);
+  const handleClick = () => setShow(!show);
+  const [isLoading, setLoading] = useState(false);
+  const toast = useToast();
+
+  const handleSubmit = async () => {
+    const resp = await appSignUp(
+      emailRef.current,
+      passwordRef.current,
+      firstNameRef.current + " " + lastNameRef.current
+    );
+    if (resp?.user) {
+      setLoading(true);
+      toast.show({
+        title: 'Account Created!',
+        description: `Your Account has been created.`,
+        variant: 'solid',
+        duration: 10000,
+        // isClosable: true,
+      });
+      router.replace("/");
+    } else {
+      console.log(resp?.user);
+    }
+  }
 
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Stack.Screen
+      {/* <Stack.Screen
         options={{ title: "Create Account", headerLeft: () => <></> }}
+      /> */}
+      <Image
+        style={styles.logo}
+        source={require('../../assets/images/logo.png')}
       />
-      <View>
-        <Text style={styles.label}>Email</Text>
-        <TextInput
-          placeholder="email"
-          nativeID="email"
-          onChangeText={(text) => {
-            emailRef.current = text;
-          }}
-          style={styles.textInput}
-        />
-      </View>
-      <View>
-        <Text style={styles.label}>First Name</Text>
-        <TextInput
-          placeholder="firstName"
+      <View style={styles.innerContainers}>
+        <Input
+          placeholder="Enter First Name"
           nativeID="firstName"
           onChangeText={(text) => {
             firstNameRef.current = text;
           }}
           style={styles.textInput}
+          leftIcon={
+            < Icon
+              name='user'
+              solid
+              type="font-awesome-5"
+              color={COLORS.primary}
+            />
+          }
         />
       </View>
-      <View>
-        <Text style={styles.label}>Last Name</Text>
-        <TextInput
-          placeholder="lastName"
+      <View style={styles.innerContainers}>
+        <Input
+          placeholder="Enter Last Name"
           nativeID="lastName"
           onChangeText={(text) => {
             lastNameRef.current = text;
           }}
           style={styles.textInput}
+          leftIcon={
+            < Icon
+              name='user'
+              solid
+              type="font-awesome-5"
+              color={COLORS.primary}
+            />
+          }
         />
       </View>
-      <View>
-        <Text style={styles.label}>Password</Text>
-        <TextInput
-          placeholder="password"
-          secureTextEntry={true}
+      <View style={styles.innerContainers}>
+        <Input
+          placeholder="Enter Email"
+          autoCapitalize="none"
+          nativeID="email"
+          onChangeText={(text) => {
+            emailRef.current = text;
+          }}
+          style={styles.textInput}
+          leftIcon={
+            < Icon
+              name='envelope'
+              solid
+              type="font-awesome-5"
+              color={COLORS.primary}
+            />
+          }
+        />
+      </View>
+
+      <View style={styles.innerContainers}>
+        <Input
+          placeholder="Enter Password"
+          secureTextEntry={show ? false : true}
           nativeID="password"
           onChangeText={(text) => {
             passwordRef.current = text;
           }}
           style={styles.textInput}
+          leftIcon={
+            < Icon
+              name='lock'
+              solid
+              type="font-awesome-5"
+              color={COLORS.primary}
+            />
+          }
+          rightIcon={
+            < Icon
+              name={show ? 'eye' : 'eye-slash'}
+              type="font-awesome-5"
+              size={24}
+              color={COLORS.primary}
+              onPress={handleClick}
+            />
+          }
         />
       </View>
 
-      <TouchableOpacity>
-        <Text
-          style={{ marginBottom: 8 }}
-          onPress={async () => {
-            const resp = await appSignUp(
-              emailRef.current,
-              passwordRef.current,
-              firstNameRef.current + " " + lastNameRef.current
-            );
-            if (resp?.user) {
-              router.replace("/");
-            } else {
-              console.log(resp?.user);
-            }
-          }}
-        >
-          Save New User
-        </Text>
-      </TouchableOpacity>
-
-      <Text
-        onPress={() => {
-          AuthStore.update((s) => {
-            s.isLoggedIn = false;
-          });
-          router.back();
+      <TouchableOpacity
+        style={styles.signBtn}
+        onPress={async () => {
+          const resp = await appSignUp(
+            emailRef.current,
+            passwordRef.current,
+            firstNameRef.current + " " + lastNameRef.current
+          );
+          if (resp?.user) {
+            router.replace("/");
+          } else {
+            console.log(resp?.user);
+          }
         }}
       >
-        CANCEL
-      </Text>
-
-      <View style={{ marginTop: 32 }}>
+        <Text style={styles.signBtnText}>Create An Account</Text>
+      </TouchableOpacity>
+      <Text style={{ color: COLORS.secondary, fontWeight: '600' }}>
+        Already have an Account?
         <Text
-          style={{ fontWeight: "500" }}
-          onPress={() => router.replace("/login")}
-        >
-          Click Here To Return To Sign In Page
-        </Text>
-      </View>
-
-
+          style={{ color: '#407BFF' }}
+          onPress={() => {
+            router.push("/login");
+          }}
+        > Sign In</Text>
+      </Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  innerContainers: {
+    width: '85%',
+  },
   label: {
     marginBottom: 4,
     color: "#455fff",
   },
   textInput: {
-    width: 250,
-    borderWidth: 1,
-    borderRadius: 4,
-    borderColor: "#455fff",
     paddingHorizontal: 8,
-    paddingVertical: 4,
+    // paddingVertical: 4,
     marginBottom: 8,
+  },
+  signBtn: {
+    padding: 15,
+    marginVertical: 5,
+    backgroundColor: "#407BFF",
+    width: '80%',
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: SIZES.medium,
+  },
+  signBtnText: {
+    fontSize: SIZES.medium,
+    color: COLORS.white,
+    fontFamily: FONT.bold,
+  },
+  logo: {
+    width: 160,
+    height: 160,
   },
 });

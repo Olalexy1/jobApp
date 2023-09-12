@@ -23,7 +23,7 @@ export default function TabLayout() {
     <Tabs
       initialRouteName='home'
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: "#407BFF",
         tabBarShowLabel: false,
         headerShown: false
       }}>
