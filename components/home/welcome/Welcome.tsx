@@ -10,7 +10,7 @@ import {
 import { useRouter } from "expo-router";
 import { AuthStore } from "../../../firebase";
 import styles from "./welcome.style";
-import { icons, SIZES } from "../../../constants";
+import { icons, SIZES, COLORS } from "../../../constants";
 import AvatarBtn from "../../common/avatar/avatar";
 import { avatarLetters } from "../../../utils";
 
@@ -45,6 +45,7 @@ const Welcome: React.FC<WelcomeProps> = ({ searchTerm, setSearchTerm, handleClic
             value={searchTerm}
             onChangeText={(text) => setSearchTerm(text)}
             placeholder='What are you looking for?'
+            placeholderTextColor={COLORS.secondary}
           />
         </View>
 
