@@ -5,7 +5,7 @@ import { AuthStore, appSignUp } from "../../firebase";
 import { Input, Icon } from '@rneui/themed';
 import { Stack, useRouter } from "expo-router";
 import { COLORS, FONT, SIZES } from "../../constants";
-import { useToast, VStack, HStack, Center, IconButton, CloseIcon, Alert, NativeBaseProvider } from 'native-base';
+import { useToast, VStack, HStack, Center, IconButton, CloseIcon, Alert } from 'native-base';
 import { validateEmail } from "../../utils";
 
 interface FormData {
@@ -45,13 +45,7 @@ export default function CreateAccount() {
     password: ''
   });
 
-  // const handleChangeInput = (name: string, value: string) => {
-  //   setFormData({ ...formData, [name]: value });
-  //   setErrors(prevErrors => ({ ...prevErrors, [name]: '' }));
-  // };
-
   const handleChangeInput =  (name: string, e: NativeSyntheticEvent<TextInputChangeEventData>)  => {
-    // const { name, value } = e.target;
     const value = e.nativeEvent.text;
     setFormData({ ...formData, [name]: value });
     setErrors(prevErrors => ({ ...prevErrors, [name]: '' }));
@@ -136,14 +130,7 @@ export default function CreateAccount() {
 
   const handleSubmit = async () => {
 
-    // const formData = {
-    //   firstName: firstNameRef.current ? firstNameRef.current : '',
-    //   lastName: lastNameRef.current ? lastNameRef.current : '',
-    //   email: emailRef.current ? emailRef.current : '',
-    //   password: passwordRef.current ? passwordRef.current : '',
-    // };
-
-    console.log('formData', formData);
+    // console.log('formData', formData);
 
     if (validateInputs()) {
       const resp = await appSignUp(

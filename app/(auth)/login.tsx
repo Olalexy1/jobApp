@@ -1,9 +1,23 @@
-import { Text, View, TextInput, StyleSheet, Alert, TouchableOpacity, Image } from "react-native";
+import { Text, View, TextInput, StyleSheet, TouchableOpacity, Image, NativeSyntheticEvent, TextInputChangeEventData } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import { Input, Icon } from '@rneui/themed';
 import { AuthStore, appSignIn } from "../../firebase";
 import { COLORS, FONT, SIZES } from "../../constants";
+import { validateEmail } from "../../utils";
+import { useToast, VStack, HStack, Center, IconButton, CloseIcon, Alert } from 'native-base';
+
+interface FormData {
+  email: string;
+  password: string;
+}
+
+interface ToastItem {
+  title: string;
+  variant: string;
+  description: string;
+  isClosable?: boolean;
+}
 
 export default function Login() {
   // const { signIn } = useAuth();
@@ -12,6 +26,106 @@ export default function Login() {
   const passwordRef = useRef("");
   const [show, setShow] = useState(false);
   const handleClick = () => setShow(!show);
+  const toast = useToast();
+
+  const [formData, setFormData] = useState<FormData>({ email: '', password: '' });
+
+  const { email, password } = formData;
+
+  const [errors, setErrors] = useState({
+    email: '',
+    password: ''
+  });
+
+  const handleChangeInput = (name: string, e: NativeSyntheticEvent<TextInputChangeEventData>) => {
+    const value = e.nativeEvent.text;
+    setFormData({ ...formData, [name]: value });
+    setErrors(prevErrors => ({ ...prevErrors, [name]: '' }));
+  };
+
+  const ToastAlert: React.FC<ToastItem & { id: string, status?: string, duration: number }> = ({
+    id,
+    status,
+    variant,
+    title,
+    description,
+    isClosable,
+    duration,
+    ...rest
+  }) => (
+    <Alert
+      maxWidth="90%"
+      alignSelf="center"
+      flexDirection="row"
+      status={status ? status : "info"}
+      variant={variant}
+      {...rest}
+    >
+      <VStack space={1} flexShrink={1} w="100%">
+        <HStack flexShrink={1} alignItems="center" justifyContent="space-between">
+          <HStack space={2} flexShrink={1} alignItems="center">
+            <Alert.Icon />
+            <Text style={styles.alertTitleText}>
+              {title}
+            </Text>
+          </HStack>
+          {isClosable ? (
+            <IconButton
+              variant="unstyled"
+              icon={<CloseIcon size="3" />}
+              _icon={{
+                color: variant === "solid" ? "lightText" : "darkText"
+              }}
+              onPress={() => toast.close(id)}
+            />
+          ) : null}
+        </HStack>
+        <Text style={styles.alertTitleText}>
+          {description}
+        </Text>
+      </VStack>
+    </Alert>
+  );
+
+  const validateInputs = () => {
+    let validationPassed = true;
+    const newErrors = { email: '', password: '' };
+
+    if (!email.trim()) {
+      newErrors.email = 'Email is required';
+      validationPassed = false;
+    } else if (!validateEmail(email)) {
+      newErrors.email = 'Invalid email format';
+      validationPassed = false;
+    }
+
+    if (!password.trim()) {
+      newErrors.password = 'Password is required';
+      validationPassed = false;
+    }
+
+    setErrors(newErrors);
+    return validationPassed;
+  };
+
+  const handleSubmit = async () => {
+    if (validateInputs()) {
+      const resp = await appSignIn(formData.email, formData.password);
+      if (resp?.user) {
+        router.replace("/");
+      } else {
+        console.log(resp?.error)
+        toast.show({
+          placement: "top",
+          render: ({
+            id
+          }) => {
+            return <ToastAlert id={id} title={"Incorrect Credentials!"} variant={"solid"} description={"Please enter correct password and email."} duration={10000} status={"error"} isClosable={true} />;
+          }
+        })
+      }
+    }
+  }
 
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center", width: '100%' }}>
@@ -28,6 +142,7 @@ export default function Login() {
           onChangeText={(text) => {
             emailRef.current = text;
           }}
+          onChange={(value) => handleChangeInput('email', value)}
           style={styles.textInput}
           leftIcon={
             < Icon
@@ -37,6 +152,7 @@ export default function Login() {
               color={COLORS.primary}
             />
           }
+          errorMessage={errors.email}
         />
       </View>
 
@@ -49,6 +165,7 @@ export default function Login() {
           onChangeText={(text) => {
             passwordRef.current = text;
           }}
+          onChange={(value) => handleChangeInput('password', value)}
           style={styles.textInput}
           leftIcon={
             < Icon
@@ -67,17 +184,11 @@ export default function Login() {
               onPress={handleClick}
             />
           }
+          errorMessage={errors.password}
         />
       </View>
       <TouchableOpacity style={styles.loginBtn}
-        onPress={async () => {
-          const resp = await appSignIn(emailRef.current, passwordRef.current);
-          if (resp?.user) {
-            router.replace("/");
-          } else {
-            console.log(resp?.error)
-          }
-        }}
+        onPress={handleSubmit}
       >
         <Text style={styles.loginBtnText}>Login</Text>
       </TouchableOpacity>
@@ -125,5 +236,10 @@ const styles = StyleSheet.create({
   logo: {
     width: 160,
     height: 160,
+  },
+  alertTitleText: {
+    fontSize: SIZES.medium,
+    color: COLORS.white,
+    fontFamily: FONT.bold,
   },
 });
