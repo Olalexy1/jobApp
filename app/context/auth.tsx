@@ -74,7 +74,7 @@ export function Provider(props: ProviderProps) {
 
       const inAuthGroup = segments[0] === "(auth)";
 
-      console.log(authInitialized, " The second useEffect state")
+      // console.log(authInitialized, " The second useEffect state")
 
       if (!authInitialized) return;
 
@@ -84,12 +84,12 @@ export function Provider(props: ProviderProps) {
         !inAuthGroup
       ) {
         // Redirect to the sign-in page.
-        console.log("This app does not have a user")
+        // console.log("This app does not have a user")
 
         router.push("/(auth)/login");
         // router.push("/(auth)/login")
       } else if (user && inAuthGroup) {
-        console.log(user, "This App has a user")
+        // console.log(user, "This App has a user")
         // Redirect away from the sign-in page.
         router.push("/(tabs)/home");
       }

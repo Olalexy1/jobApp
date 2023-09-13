@@ -32,7 +32,7 @@ const AuthStore = new Store<AuthStoreType>({
 });
 
 const unSub = onAuthStateChanged(auth, (user) => {
-    console.log("onAuthStateChange", user);
+    // console.log("onAuthStateChange", user);
     AuthStore.update((store) => {
         store.user = user;
         store.isLoggedIn = user ? true : false;

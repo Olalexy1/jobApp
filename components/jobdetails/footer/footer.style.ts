@@ -24,8 +24,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   likeBtnImage: {
-    width: "40%",
-    height: "40%",
+    // width: "40%",
+    // height: "40%",
     tintColor: "#407BFF",
   },
   applyBtn: {

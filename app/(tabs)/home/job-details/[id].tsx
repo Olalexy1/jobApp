@@ -8,6 +8,7 @@ import {
   ScrollView,
   ActivityIndicator,
   RefreshControl,
+  Share
 } from "react-native";
 
 import {
@@ -36,7 +37,7 @@ const JobDetails = () => {
 
   const jobDetails = jobDetailsData?.data || [];
 
-  console.log(jobDetails, 'Job Details')
+  // console.log(jobDetails, 'Job Details')
 
   const [activeTab, setActiveTab] = useState(tabs[0]);
   const [refreshing, setRefreshing] = useState(false);
@@ -76,6 +77,30 @@ const JobDetails = () => {
     }
   };
 
+  const jobTitle: string = jobDetails[0]?.job_title ?? 'Job Title'
+  const jobLink: string = jobDetails[0]?.job_google_link ?? 'https://careers.google.com/jobs/results/'
+
+  const shareText = async () => {
+    try {
+      const result = await Share.share({
+        title: jobTitle,
+        message: jobLink,
+      });
+      if (result.action === Share.sharedAction) {
+        if (result.activityType){
+          console.log('Shared with activity type of: ', result.activityType)
+        } else {
+          console.log('Shared successfully');
+        } 
+      } else if (result.action === Share.dismissedAction) {
+        console.log('Share dismissed');
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+    }
+  };
+
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.lightWhite }}>
       <Stack.Screen
@@ -91,9 +116,7 @@ const JobDetails = () => {
             />
           ),
           headerRight: () => (
-            <ScreenHeaderBtn iconUrl={icons.share} dimension='60%' handlePress={function (): void {
-              throw new Error("Function not implemented.");
-            }} />
+            <ScreenHeaderBtn iconUrl={icons.share} dimension='60%' handlePress={shareText} />
           ),
           headerTitle: "",
         }}

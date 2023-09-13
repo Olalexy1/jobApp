@@ -30,12 +30,12 @@ const JobSearch = () => {
     const handlePagination = (direction: string) => {
         if (direction === 'left' && page > 1) {
             setPage(page - 1)
-            console.log(page, 'left')
+            // console.log(page, 'left')
 
         } else if (direction === 'right') {
             setPage(page + 1)
             
-            console.log(page, 'right')
+            // console.log(page, 'right')
         }
     }
 

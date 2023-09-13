@@ -32,7 +32,7 @@ const PopularJobs = () => {
     setSelectedJob(item.job_id);
   };
 
-  console.log(error, "error")
+  // console.log(error, "error")
 
   return (
     <View style={styles.container}>

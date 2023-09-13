@@ -12,6 +12,7 @@ import Colors from '../../constants/Colors';
 function TabBarIcon(props: {
   name: React.ComponentProps<typeof FontAwesome>['name'];
   color: string;
+  solid?: boolean;
 }) {
   return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
 }
@@ -32,6 +33,13 @@ export default function TabLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="liked"
+        options={{
+          title: 'Like',
+          tabBarIcon: ({ color }) => <TabBarIcon name="heart" solid={true} color={color} />,
         }}
       />
       <Tabs.Screen
