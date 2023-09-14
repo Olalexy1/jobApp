@@ -59,7 +59,7 @@ const JobSearch = () => {
             {isLoading || isFetching ? (
                 <ActivityIndicator size='large' color={COLORS.primary} />
             ) : error ? (
-                <Text>Something went wrong</Text>
+                <Text style={{marginHorizontal: 20}}>Something went wrong</Text>
             ) : (
 
                 <FlatList
@@ -67,7 +67,7 @@ const JobSearch = () => {
                     renderItem={({ item }) => (
                         <NearbyJobCard
                             job={item}
-                            handleNavigate={() => router.push(`/job-details/${item.job_id}`)}
+                            handleNavigate={() => router.push(`/home/job-details/${item.job_id}`)}
                         />
                     )}
                     keyExtractor={(item) => item.job_id}

@@ -22,6 +22,15 @@ const styles = StyleSheet.create<Styles | any>({
     height: dimension,
     borderRadius: SIZES.small / 1.25,
   }),
+  header: {
+    flex: 1,
+    flexDirection:'row',
+    justifyContent:"center"
+  },
+  headerText: {
+    fontWeight: '600',
+    color: COLORS.secondary
+  }
 });
 
 export default styles;

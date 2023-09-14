@@ -6,19 +6,12 @@ import { COLORS, SIZES } from "../../../constants";
 import {
   NearByJobs,
   PopularJobs,
-  ScreenHeaderBtn,
   Welcome,
-  AvatarBtn
 } from "../../../components";
-
-import { avatarLetters } from "../../../utils";
-import { AuthStore } from "../../../firebase";
 
 const Home = () => {
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState("");
-  const avatar = AuthStore.getRawState().user?.displayName?.toString()
-  const letterAvatar = avatarLetters(avatar)
 
   return (
     <SafeAreaView style={styles.container}>
@@ -26,10 +19,6 @@ const Home = () => {
         options={{
           headerStyle: { backgroundColor: COLORS.lightWhite },
           headerShadowVisible: false,
-          // headerLeft: () => (
-          //   <AvatarBtn avatar={letterAvatar}/>
-          // ),
-          // headerTitle: "",
           headerShown: false
         }}
       />

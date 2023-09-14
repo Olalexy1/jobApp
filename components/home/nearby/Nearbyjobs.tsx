@@ -15,7 +15,7 @@ const NearByJobs = () => {
   const [errorMsg, setErrorMsg] = useState<string | ''>('');
   const [country, setCountry] = useState<string | null>(null);
   const [countryCode, setCountryCode] = useState<string | null>(null);
-  const GOOGLE_MAPS_API_KEY = 'AIzaSyD5lUokXK7izSWBI_mfTClS5jYaMLr6YK8';
+  const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_KEY
 
   const searchParams = {
     query: 'React developer in Nigeria',
@@ -89,6 +89,8 @@ const NearByJobs = () => {
 
   const jobSearchResult = jobSearchData?.data || [];
 
+  // console.log(jobSearchData, 'nearby')
+
 
 
   return (
@@ -110,7 +112,7 @@ const NearByJobs = () => {
             <NearbyJobCard
               job={job}
               key={`nearby-job-${job.job_id}`}
-              handleNavigate={() => router.push(`/job-details/${job.job_id}`)}
+              handleNavigate={() => router.push(`/home/job-details/${job.job_id}`)}
             />
           ))
         )}

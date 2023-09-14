@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Stack, useGlobalSearchParams, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import {
@@ -18,6 +18,7 @@ import {
   JobTabs,
   ScreenHeaderBtn,
   Specifics,
+  ScreenHeader
 } from "../../../../components";
 import { COLORS, icons, SIZES } from "../../../../constants";
 import { useGetJobDetailsQuery } from "../../../../services/jobsApi";
@@ -28,6 +29,12 @@ const tabs = ["About", "Qualifications", "Responsibilities"];
 const JobDetails = () => {
   const params = useGlobalSearchParams();
   const router = useRouter();
+
+  const liked = params.liked;
+
+  const [initialLike, setInitialLike] = useState(liked)
+
+  console.log(initialLike, 'params')
 
   const JobDetailsParams = {
     job_id: params.id,
@@ -43,6 +50,7 @@ const JobDetails = () => {
   const [activeTab, setActiveTab] = useState(tabs[0]);
   const [refreshing, setRefreshing] = useState(false);
   const [isLiked, setIsLiked] = useState<boolean>(false)
+  const [likedJobsList, setLikedJobsList] = useState<any[]>([]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -79,8 +87,8 @@ const JobDetails = () => {
     }
   };
 
-  const jobTitle: string = jobDetails[0]?.job_title;
-  const jobLink: string = jobDetails[0]?.job_google_link ?? 'https://careers.google.com/jobs/results/'
+  const jobTitle: string = jobDetails[0]?.job_title ?? 'Job Title';
+  const jobLink: string = jobDetails[0]?.job_google_link ?? 'https://careers.google.com/jobs/results/';
   const jobLogo: string = jobDetails[0]?.employer_logo;
   const jobType: string = jobDetails[0]?.job_employment_type;
 
@@ -91,11 +99,11 @@ const JobDetails = () => {
         message: jobLink,
       });
       if (result.action === Share.sharedAction) {
-        if (result.activityType){
+        if (result.activityType) {
           console.log('Shared with activity type of: ', result.activityType)
         } else {
           console.log('Shared successfully');
-        } 
+        }
       } else if (result.action === Share.dismissedAction) {
         console.log('Share dismissed');
       }
@@ -105,21 +113,23 @@ const JobDetails = () => {
   };
 
   const handleClicked = async () => {
+    setInitialLike('false')
     setIsLiked((prevIsLiked) => {
-      const newIsLiked = !prevIsLiked;
-  
+
+      const newIsLiked = !prevIsLiked;;
+
       const jobData = {
         jobId: params.id,
         jobTitle: jobTitle,
         jobLink: jobLink,
         jobLogo: jobLogo,
         jobType: jobType,
-        liked: true
+        liked: true,
       };
-  
+
       try {
-        if (newIsLiked) {
-          appendJobToStorage('job_data', jobData);
+        if (newIsLiked && initialLike === 'false') {
+          saveJobToStorage('job_data', jobData);
         } else {
           deleteJobFromStorage('job_data');
         }
@@ -127,46 +137,20 @@ const JobDetails = () => {
       } catch (error) {
         console.error('Error with data operation:', error);
       }
-  
+
       return newIsLiked;
     });
   };
 
-  // const saveJobToStorage = async (key: string, value: any) => {
-  //   try {
-  //     await AsyncStorage.setItem(key, JSON.stringify(value));
-  //     console.log('Data saved successfully');
-  //   } catch (error) {
-  //     console.error('Error saving data:', error);
-  //     throw error;
-  //   }
-  // };
-
-  const appendJobToStorage = async (key: string, value: any) => {
+  const saveJobToStorage = async (key: string, value: any) => {
     try {
-      // Retrieve the existing data from local storage
-      const existingData = await AsyncStorage.getItem(key);
-  
-      // Parse the existing data (or initialize an empty array if it's the first time)
-      let existingArray = existingData ? JSON.parse(existingData) : [];
-  
-      // Check if the existing data is an array; if not, create an array with the existing value
-      if (!Array.isArray(existingArray)) {
-        existingArray = [existingArray];
-      }
-  
-      // Append the new value to the existing array
-      existingArray.push(value);
-  
-      // Save the updated array back to local storage
-      await AsyncStorage.setItem(key, JSON.stringify(existingArray));
-      console.log('Data appended successfully');
+      await AsyncStorage.setItem(key, JSON.stringify(value));
+      console.log('Data saved successfully');
     } catch (error) {
-      console.error('Error appending data:', error);
+      console.error('Error saving data:', error);
       throw error;
     }
   };
-  
 
   const deleteJobFromStorage = async (key: string) => {
     try {
@@ -177,7 +161,6 @@ const JobDetails = () => {
       throw error;
     }
   };
-
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.lightWhite }}>
@@ -196,7 +179,8 @@ const JobDetails = () => {
           headerRight: () => (
             <ScreenHeaderBtn iconUrl={icons.share} dimension='60%' handlePress={shareText} />
           ),
-          headerTitle: "  Job Details",
+          // header: (props) => <ScreenHeader {...props} title="Job Details" />,
+          headerTitle: " Job Details",
         }}
       />
 
@@ -208,9 +192,9 @@ const JobDetails = () => {
           {isLoading ? (
             <ActivityIndicator size='large' color={COLORS.primary} />
           ) : error ? (
-            <Text style={{marginHorizontal: 20}}>Something went wrong</Text>
+            <Text style={{ marginHorizontal: 20 }}>Something went wrong</Text>
           ) : jobDetailsData.length === 0 ? (
-            <Text style={{marginHorizontal: 20}}>No data available</Text>
+            <Text style={{ marginHorizontal: 20 }}>No data available</Text>
           ) : (
             <View style={{ padding: SIZES.medium, paddingBottom: 100 }}>
               <Company
@@ -231,7 +215,7 @@ const JobDetails = () => {
           )}
         </ScrollView>
 
-        <JobFooter url={jobDetails[0]?.job_google_link ?? 'https://careers.google.com/jobs/results/'} handlePress={handleClicked} liked={isLiked}/>
+        <JobFooter url={jobDetails[0]?.job_google_link ?? 'https://careers.google.com/jobs/results/'} handlePress={handleClicked} liked={initialLike === 'true' ? true : isLiked} />
       </>
     </SafeAreaView>
   );

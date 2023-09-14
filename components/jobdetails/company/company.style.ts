@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
   },
   companyInfoBox: {
     marginTop: SIZES.small / 2,
-    flexDirection: "row",
+    flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -39,6 +39,7 @@ const styles = StyleSheet.create({
     fontSize: SIZES.medium - 2,
     color: COLORS.primary,
     fontFamily: FONT.medium,
+    width: "auto"
   },
   locationBox: {
     flexDirection: "row",
