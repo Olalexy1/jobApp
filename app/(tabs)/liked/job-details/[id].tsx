@@ -130,7 +130,7 @@ const JobDetails = () => {
       };
 
       try {
-        if (newIsLiked) {
+        if (newIsLiked && initialLike === 'false') {
           AsyncStorageManager.appendJobToStorage('job_data', jobData);
         } else {
           AsyncStorageManager.removeSpecificJobFromStorage('job_data', jobData);

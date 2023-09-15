@@ -61,8 +61,6 @@ const LikedJobs = ({ focused }: any) => {
         return value;
     });
 
-    // console.log(jobLikedResultValue, 'filteredArray')
-
     return (
         <View style={styles.container}>
             <View style={styles.cardsContainer}>

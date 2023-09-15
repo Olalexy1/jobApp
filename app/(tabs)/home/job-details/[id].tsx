@@ -158,7 +158,8 @@ const JobDetails = () => {
           headerRight: () => (
             <ScreenHeaderBtn iconUrl={icons.share} dimension='60%' handlePress={shareText} />
           ),
-          headerTitle: "  Job Details",
+          headerTitle: "Job Details",
+          headerTitleAlign: 'center'
         }}
       />
 

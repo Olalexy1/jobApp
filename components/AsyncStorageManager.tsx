@@ -9,6 +9,8 @@ type AsyncStorageCallback = (payload: AsyncStorageEvent) => void;
 
 const AsyncStorageManager = {
 
+    listeners: {} as Record<string, AsyncStorageCallback[]>,
+
     async appendJobToStorage(key: string, value: any) {
         try {
             // Retrieve the existing data from local storage
@@ -27,20 +29,17 @@ const AsyncStorageManager = {
 
             const index = existingArray.findIndex((item: { jobId: any; }) => item.jobId === jobIdToCheck);
 
-            if (index !== -1) {
-                console.log('Object already exists');
-            } else {
-                // Append the new value to the existing array
+            if (index === -1) {
                 existingArray.push(value);
+                // Save the updated array back to local storage
+                await AsyncStorage.setItem(key, JSON.stringify(existingArray));
+                console.log('Data appended successfully');
+
+                AsyncStorageManager.emitEvent('jobAppended', { key, value });
+            } else {
+                console.log('Object already exists');
             }
 
-            // if (index === -1) {
-
-            // }
-
-            // Save the updated array back to local storage
-            await AsyncStorage.setItem(key, JSON.stringify(existingArray));
-            console.log('Data appended successfully');
         } catch (error) {
             console.error('Error appending data:', error);
             throw error;
@@ -93,7 +92,7 @@ const AsyncStorageManager = {
         }
     },
 
-    async getAllItemsFromStorage () {
+    async getAllItemsFromStorage() {
         try {
             const allKeys = await AsyncStorage.getAllKeys();
             const allItems = await AsyncStorage.multiGet(allKeys);
@@ -121,14 +120,23 @@ const AsyncStorageManager = {
     //   }
     // };
 
-    // Custom event handling
-    listeners: {} as Record<string, AsyncStorageCallback[]>,
     addListener(eventName: string, callback: AsyncStorageCallback) {
         if (!AsyncStorageManager.listeners[eventName]) {
             AsyncStorageManager.listeners[eventName] = [];
         }
         AsyncStorageManager.listeners[eventName].push(callback);
     },
+
+    removeListener(eventName: string, callback: AsyncStorageCallback) {
+        const listeners = AsyncStorageManager.listeners[eventName];
+        if (listeners) {
+            const index = listeners.indexOf(callback);
+            if (index !== -1) {
+                listeners.splice(index, 1);
+            }
+        }
+    },
+
     emitEvent(eventName: string, payload: AsyncStorageEvent) {
         const listeners = AsyncStorageManager.listeners[eventName] || [];
         listeners.forEach(callback => callback(payload));

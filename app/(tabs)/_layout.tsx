@@ -6,7 +6,7 @@ import { COLORS, FONT, SIZES } from "../../constants";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
 import { useIsFocused } from '@react-navigation/native';
-import AsyncStorageManager from '../../components/AsyncStorageManager';
+import AsyncStorageManager, { AsyncStorageEvent } from '../../components/AsyncStorageManager';
 
 type JobObject = {
   key: string;
@@ -24,60 +24,60 @@ function TabBarIcon(props: {
 export default function TabLayout() {
   const [likedJobsList, setLikedJobsList] = useState<any[]>([]);
   const isFocused = useIsFocused();
+  const [likedJobsNo, setLikedJobsNo] = useState<number>(0);
 
-  const getAllItemsFromStorage = async () => {
-    try {
-      const allKeys = await AsyncStorage.getAllKeys();
-      const allItems = await AsyncStorage.multiGet(allKeys);
-
-      // Parse each item's value from JSON
-      const parsedItems = allItems.map(([key, value]) => {
-        return { key, value: JSON.parse(value || 'null') };
-      });
-
-      return parsedItems;
-    } catch (error) {
-      console.error('Error retrieving data:', error);
-    }
-  };
 
   const handleRetrieved = async () => {
-    const retrievedItems = await getAllItemsFromStorage();
+    const retrievedItems = await AsyncStorageManager.getAllItemsFromStorage();
     if (retrievedItems) {
-      const LikedJobs = retrievedItems.length > 0;
-      if (LikedJobs) {
-        setLikedJobsList(retrievedItems)
+      const jobDataItems = retrievedItems.filter(item => item.key === "job_data");
+      if (jobDataItems.length > 0) {
+        setLikedJobsList(jobDataItems[0].value);
       }
     } else {
-      // console.log('No items retrieved from storage.');
+      // Handle the case when no items are retrieved.
     }
   };
 
-  // AsyncStorageManager.addListener('storageChange', handleRetrieved);
+  useEffect(() => {
+    handleRetrieved();
+
+    // Add a listener for changes to the "job_data" key in AsyncStorage.
+    AsyncStorageManager.addListener('jobAppended', (event: AsyncStorageEvent) => {
+      if (event.key === 'jobAppended') {
+        handleRetrieved();
+      }
+    });
+
+    // Clean up the listener when the component unmounts.
+    return () => {
+      AsyncStorageManager.removeListener('jobAppended', (event: AsyncStorageEvent) => {
+        if (event.key === 'jobAppended') {
+          console.log('event cleaned up')
+        }
+      });
+    };
+  }, [ ]);
 
   useEffect(() => {
-    if (isFocused) {
-       console.log('In inFocused Block', isFocused);
-       handleRetrieved()
-    }
-  }, [isFocused]);
+    setLikedJobsNo(jobLikedResultValue.length);
+  }, [isFocused, likedJobsList]);
 
   function filterJobData(data: JobObject[]): JobObject[] {
     return data.filter((item) => item.key === "job_data");
   }
 
-  let jobLikedResult = filterJobData(likedJobsList) || [];
 
-  console.log(likedJobsList, jobLikedResult, 'jobLikedResult')
+  // let jobLikedResult = filterJobData(likedJobsList) || [];
 
-  let jobLikedResultValue = jobLikedResult.map((item) => {
+  let jobLikedResultValue = likedJobsList?.map((item) => {
     const value = item.value;
     return value;
   });
 
-  let likedJobsNo = jobLikedResultValue.flat().length
+  // let likedJobsNo = jobLikedResultValue.length
 
-  console.log(likedJobsNo, 'likedJobsNo')
+  console.log(likedJobsList, likedJobsNo, 'likedJobsNo', isFocused)
 
   return (
     <Tabs
