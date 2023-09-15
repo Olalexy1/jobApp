@@ -1,6 +1,5 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useCallback, useState } from "react";
 import { Stack, useGlobalSearchParams, useRouter } from "expo-router";
-import { useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -8,7 +7,7 @@ import {
   ScrollView,
   ActivityIndicator,
   RefreshControl,
-  Share
+  Share,
 } from "react-native";
 
 import {
@@ -22,7 +21,7 @@ import {
 import { COLORS, icons, SIZES } from "../../../../constants";
 import { useGetJobDetailsQuery } from "../../../../services/jobsApi";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import AsyncStorageManager, { AsyncStorageEvent } from "../../../../components/AsyncStorageManager";
+import AsyncStorageManager from "../../../../components/AsyncStorageManager";
 
 const tabs = ["About", "Qualifications", "Responsibilities"];
 
@@ -32,27 +31,20 @@ const JobDetails = () => {
   const [initialLike, setInitialLike] = useState(false);
   const [savedJobsList, setSavedJobsList] = useState<any[]>([]);
 
-  // const JobDetailsParams = {
-  //   job_id: params.id,
-  //   extended_publisher_details: 'true',
-  // }
-
   const JobDetailsParams = useMemo(() => ({
     job_id: params.id,
     extended_publisher_details: 'true',
   }), [params.id]);
 
-  const handleRetrieved = async () => {
+  const handleRetrieved = useCallback(async () => {
     const retrievedItems = await AsyncStorageManager.getAllItemsFromStorage();
     if (retrievedItems) {
       const jobDataItems = retrievedItems.filter(item => item.key === "job_data");
       if (jobDataItems.length > 0) {
         setSavedJobsList(jobDataItems[0].value);
       }
-    } else {
-
     }
-  };
+  }, []);
 
   useEffect(() => {
     handleRetrieved();
@@ -61,20 +53,14 @@ const JobDetails = () => {
     return () => {
       AsyncStorageManager.removeListener('jobAppended', handleRetrieved);
     };
-  }, []);
+  }, [handleRetrieved]);
 
-  const jobIdToCheck = params.id
-
-  const index = savedJobsList.findIndex((item: { jobId: any }) => item.jobId === jobIdToCheck)
+  const jobIdToCheck = params.id;
+  const index = savedJobsList.findIndex((item: { jobId: any }) => item.jobId === jobIdToCheck);
 
   useEffect(() => {
-    if (index !== -1) {
-      setInitialLike((prevIsLiked) => !prevIsLiked);
-    } else {
-      // console.log('Object has not been liked before');
-    }
-  }, [savedJobsList]);
-
+    setInitialLike(index !== -1);
+  }, [index]);
 
   const { data: jobDetailsData, isLoading, error, refetch } = useGetJobDetailsQuery(JobDetailsParams);
 
@@ -82,14 +68,13 @@ const JobDetails = () => {
 
   const [activeTab, setActiveTab] = useState(tabs[0]);
   const [refreshing, setRefreshing] = useState(false);
-  const [isLiked, setIsLiked] = useState<boolean>(false)
+  const [isLiked, setIsLiked] = useState<boolean>(false);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await refetch()
-    setRefreshing(false)
-  }, []);
-
+    await refetch();
+    setRefreshing(false);
+  }, [refetch]);
 
   const displayTabContent = () => {
     switch (activeTab) {
@@ -120,7 +105,7 @@ const JobDetails = () => {
   };
 
   const jobTitle: string = jobDetails[0]?.job_title;
-  const jobLink: string = jobDetails[0]?.job_google_link ?? 'https://careers.google.com/jobs/results/'
+  const jobLink: string = jobDetails[0]?.job_google_link ?? 'https://careers.google.com/jobs/results/';
   const jobLogo: string = jobDetails[0]?.employer_logo;
   const jobType: string = jobDetails[0]?.job_employment_type;
 
@@ -132,11 +117,12 @@ const JobDetails = () => {
       });
       if (result.action === Share.sharedAction) {
         if (result.activityType) {
-          console.log('Shared with activity type of: ', result.activityType)
+          console.log('Shared with activity type of: ', result.activityType);
         } else {
           console.log('Shared successfully');
         }
       } else if (result.action === Share.dismissedAction) {
+        // Handle dismissal
       }
     } catch (error) {
       console.error('Error sharing:', error);
@@ -153,7 +139,7 @@ const JobDetails = () => {
         jobLink: jobLink,
         jobLogo: jobLogo,
         jobType: jobType,
-        liked: true
+        liked: true,
       };
 
       try {
@@ -168,7 +154,7 @@ const JobDetails = () => {
 
       return newIsLiked;
     });
-  }, [params.id, jobTitle, jobLink, jobLogo, jobType, savedJobsList]);
+  }, [params.id, jobTitle, jobLink, jobLogo, jobType]);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.lightWhite }}>
@@ -192,39 +178,38 @@ const JobDetails = () => {
         }}
       />
 
-      <>
-        <ScrollView showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        >
-          {isLoading ? (
-            <ActivityIndicator size='large' color={COLORS.primary} />
-          ) : error ? (
-            <Text style={{ marginHorizontal: 20 }}>Something went wrong</Text>
-          ) : jobDetailsData.length === 0 ? (
-            <Text style={{ marginHorizontal: 20 }}>No data available</Text>
-          ) : (
-            <View style={{ padding: SIZES.medium, paddingBottom: 100 }}>
-              <Company
-                companyLogo={jobDetails[0].employer_logo}
-                jobTitle={jobDetails[0].job_title}
-                companyName={jobDetails[0].employer_name}
-                location={jobDetails[0].job_country}
-              />
+      <ScrollView showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        {isLoading ? (
+          <ActivityIndicator size='large' color={COLORS.primary} />
+        ) : error ? (
+          <Text style={{ marginHorizontal: 20 }}>Something went wrong</Text>
+        ) : jobDetailsData.length === 0 ? (
+          <Text style={{ marginHorizontal: 20 }}>No data available</Text>
+        ) : (
+          <View style={{ padding: SIZES.medium, paddingBottom: 100 }}>
+            <Company
+              companyLogo={jobDetails[0].employer_logo}
+              jobTitle={jobDetails[0].job_title}
+              companyName={jobDetails[0].employer_name}
+              location={jobDetails[0].job_country}
+            />
 
-              <JobTabs
-                tabs={tabs}
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-              />
+            <JobTabs
+              tabs={tabs}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+            />
 
-              {displayTabContent()}
-            </View>
-          )}
-        </ScrollView>
+            {displayTabContent()}
+          </View>
+        )}
+      </ScrollView>
 
-        <JobFooter url={jobDetails[0]?.job_google_link ?? 'https://careers.google.com/jobs/results/'} handlePress={handleClicked} liked={initialLike === true ? true : isLiked} />
-      </>
+      <JobFooter url={jobDetails[0]?.job_google_link ?? 'https://careers.google.com/jobs/results/'} handlePress={handleClicked} liked={initialLike ? initialLike : isLiked} />
     </SafeAreaView>
   );
 };

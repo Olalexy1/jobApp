@@ -58,17 +58,10 @@ export default function TabLayout() {
     return data.filter((item) => item.key === "job_data");
   }
 
-
-  // let jobLikedResult = filterJobData(likedJobsList) || [];
-
   let jobLikedResultValue = likedJobsList?.map((item) => {
     const value = item.value;
     return value;
   });
-
-  // let likedJobsNo = jobLikedResultValue.length
-
-  // console.log(likedJobsList, likedJobsNo, 'likedJobsNo', isFocused)
 
   return (
     <Tabs

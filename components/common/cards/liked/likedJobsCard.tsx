@@ -16,7 +16,7 @@ const LikedJobCard: React.FC<LikedJobCardProps> = ({ job, handleNavigate }) => {
       <TouchableOpacity style={styles.logoContainer}>
         <Image
           source={{
-            uri: checkImageURL(job.jobLogo)
+            uri: checkImageURL(job?.jobLogo)
               ? job.jobLogo
               : "https://t4.ftcdn.net/jpg/05/05/61/73/360_F_505617309_NN1CW7diNmGXJfMicpY9eXHKV4sqzO5H.jpg",
           }}
@@ -27,10 +27,9 @@ const LikedJobCard: React.FC<LikedJobCardProps> = ({ job, handleNavigate }) => {
 
       <View style={styles.textContainer}>
         <Text style={styles.jobName} numberOfLines={1}>
-          {job?.jobTitle ?? 'N/A'}
+          {job?.jobTitle}
         </Text>
-
-        <Text style={styles.jobType}>{job?.jobType ?? 'N/A'}</Text>
+        <Text style={styles.jobType}>{job?.jobType}</Text>
       </View>
     </TouchableOpacity>
   );
