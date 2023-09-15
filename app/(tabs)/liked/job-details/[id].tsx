@@ -35,8 +35,6 @@ const JobDetails = () => {
 
   const [initialLike, setInitialLike] = useState(liked)
 
-  console.log(initialLike, 'params')
-
   const JobDetailsParams = {
     job_id: params.id,
     extended_publisher_details: 'true',
@@ -118,7 +116,6 @@ const JobDetails = () => {
     setIsLiked((prevIsLiked) => {
 
       const newIsLiked = !prevIsLiked;
-      // setIsLiked((prevIsLiked) => !prevIsLiked);
 
       const jobData = {
         jobId: params.id,
@@ -143,6 +140,10 @@ const JobDetails = () => {
       return newIsLiked;
     });
   };
+
+  useEffect(() => {
+    setIsLiked((prevIsLiked) => !prevIsLiked);
+  }, [])
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.lightWhite }}>

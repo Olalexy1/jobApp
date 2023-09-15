@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useMemo } from "react";
 import { Stack, useGlobalSearchParams, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import {
@@ -29,25 +29,66 @@ const tabs = ["About", "Qualifications", "Responsibilities"];
 const JobDetails = () => {
   const params = useGlobalSearchParams();
   const router = useRouter();
+  const [initialLike, setInitialLike] = useState(false);
+  const [savedJobsList, setSavedJobsList] = useState<any[]>([]);
 
-  const JobDetailsParams = {
+  // const JobDetailsParams = {
+  //   job_id: params.id,
+  //   extended_publisher_details: 'true',
+  // }
+
+  const JobDetailsParams = useMemo(() => ({
     job_id: params.id,
     extended_publisher_details: 'true',
-  }
+  }), [params.id]);
+
+  const handleRetrieved = async () => {
+    const retrievedItems = await AsyncStorageManager.getAllItemsFromStorage();
+    if (retrievedItems) {
+      const jobDataItems = retrievedItems.filter(item => item.key === "job_data");
+      if (jobDataItems.length > 0) {
+        setSavedJobsList(jobDataItems[0].value);
+      }
+    } else {
+
+    }
+  };
+
+  useEffect(() => {
+    handleRetrieved();
+    AsyncStorageManager.addListener('jobAppended', handleRetrieved);
+
+    return () => {
+      AsyncStorageManager.removeListener('jobAppended', handleRetrieved);
+    };
+  }, []);
+
+  const jobIdToCheck = params.id
+
+  const index = savedJobsList.findIndex((item: { jobId: any }) => item.jobId === jobIdToCheck)
+
+  useEffect(() => {
+    if (index !== -1) {
+      setInitialLike((prevIsLiked) => !prevIsLiked);
+      console.log('Object is liked')
+    } else {
+      console.log('Object has not been liked before');
+    }
+  }, [savedJobsList]);
+
+  console.log( savedJobsList, index, initialLike, 'savedList and object');
 
   const { data: jobDetailsData, isLoading, error, refetch } = useGetJobDetailsQuery(JobDetailsParams);
 
   const jobDetails = jobDetailsData?.data || [];
 
-  // console.log(jobDetails, 'Job Details')
-
   const [activeTab, setActiveTab] = useState(tabs[0]);
   const [refreshing, setRefreshing] = useState(false);
   const [isLiked, setIsLiked] = useState<boolean>(false)
 
-  const onRefresh = useCallback(() => {
+  const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    refetch()
+    await refetch()
     setRefreshing(false)
   }, []);
 
@@ -105,7 +146,7 @@ const JobDetails = () => {
     }
   };
 
-  const handleClicked = async () => {
+  const handleClicked = useCallback(async () => {
     setIsLiked((prevIsLiked) => {
       const newIsLiked = !prevIsLiked;
 
@@ -131,15 +172,7 @@ const JobDetails = () => {
 
       return newIsLiked;
     });
-  };
-
-  // Define a callback function that will be executed when the event occurs
-  const handleStorageChange = (event: AsyncStorageEvent) => {
-    console.log(`Storage event occurred for key: ${event.key}, new value: ${event.value}`);
-  };
-
-  // Register the callback function to listen for 'storageChange' events
-  AsyncStorageManager.addListener('storageChange', handleStorageChange);
+  }, [params.id, jobTitle, jobLink, jobLogo, jobType, savedJobsList]);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.lightWhite }}>
@@ -194,7 +227,7 @@ const JobDetails = () => {
           )}
         </ScrollView>
 
-        <JobFooter url={jobDetails[0]?.job_google_link ?? 'https://careers.google.com/jobs/results/'} handlePress={handleClicked} liked={isLiked} />
+        <JobFooter url={jobDetails[0]?.job_google_link ?? 'https://careers.google.com/jobs/results/'} handlePress={handleClicked} liked={initialLike === true ? true : isLiked} />
       </>
     </SafeAreaView>
   );

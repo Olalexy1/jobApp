@@ -35,7 +35,7 @@ export default function TabLayout() {
         setLikedJobsList(jobDataItems[0].value);
       }
     } else {
-      
+
     }
   };
 
@@ -68,7 +68,7 @@ export default function TabLayout() {
 
   // let likedJobsNo = jobLikedResultValue.length
 
-  console.log(likedJobsList, likedJobsNo, 'likedJobsNo', isFocused)
+  // console.log(likedJobsList, likedJobsNo, 'likedJobsNo', isFocused)
 
   return (
     <Tabs
