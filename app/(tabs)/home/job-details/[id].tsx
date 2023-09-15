@@ -70,13 +70,11 @@ const JobDetails = () => {
   useEffect(() => {
     if (index !== -1) {
       setInitialLike((prevIsLiked) => !prevIsLiked);
-      console.log('Object is liked')
     } else {
-      console.log('Object has not been liked before');
+      // console.log('Object has not been liked before');
     }
   }, [savedJobsList]);
 
-  console.log( savedJobsList, index, initialLike, 'savedList and object');
 
   const { data: jobDetailsData, isLoading, error, refetch } = useGetJobDetailsQuery(JobDetailsParams);
 
@@ -139,7 +137,6 @@ const JobDetails = () => {
           console.log('Shared successfully');
         }
       } else if (result.action === Share.dismissedAction) {
-        console.log('Share dismissed');
       }
     } catch (error) {
       console.error('Error sharing:', error);
@@ -165,7 +162,6 @@ const JobDetails = () => {
         } else {
           AsyncStorageManager.removeSpecificJobFromStorage('job_data', jobData);
         }
-        console.log('Data operation completed successfully');
       } catch (error) {
         console.error('Error with data operation:', error);
       }

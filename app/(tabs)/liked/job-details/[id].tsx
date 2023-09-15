@@ -104,7 +104,6 @@ const JobDetails = () => {
           console.log('Shared successfully');
         }
       } else if (result.action === Share.dismissedAction) {
-        console.log('Share dismissed');
       }
     } catch (error) {
       console.error('Error sharing:', error);
@@ -132,7 +131,6 @@ const JobDetails = () => {
         } else {
           AsyncStorageManager.removeSpecificJobFromStorage('job_data', jobData);
         }
-        console.log('Data operation completed successfully');
       } catch (error) {
         console.error('Error with data operation:', error);
       }
