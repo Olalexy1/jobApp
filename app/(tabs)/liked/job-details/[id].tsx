@@ -23,6 +23,7 @@ import {
 import { COLORS, icons, SIZES } from "../../../../constants";
 import { useGetJobDetailsQuery } from "../../../../services/jobsApi";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorageManager from "../../../../components/AsyncStorageManager";
 
 const tabs = ["About", "Qualifications", "Responsibilities"];
 
@@ -89,8 +90,8 @@ const JobDetails = () => {
 
   const jobTitle: string = jobDetails[0]?.job_title ?? 'Job Title';
   const jobLink: string = jobDetails[0]?.job_google_link ?? 'https://careers.google.com/jobs/results/';
-  const jobLogo: string = jobDetails[0]?.employer_logo;
-  const jobType: string = jobDetails[0]?.job_employment_type;
+  const jobLogo: string = jobDetails[0]?.employer_logo ?? 'https://t4.ftcdn.net/jpg/05/05/61/73/360_F_505617309_NN1CW7diNmGXJfMicpY9eXHKV4sqzO5H.jpg';
+  const jobType: string = jobDetails[0]?.job_employment_type ?? '';
 
   const shareText = async () => {
     try {
@@ -116,7 +117,8 @@ const JobDetails = () => {
     setInitialLike('false')
     setIsLiked((prevIsLiked) => {
 
-      const newIsLiked = !prevIsLiked;;
+      const newIsLiked = !prevIsLiked;
+      // setIsLiked((prevIsLiked) => !prevIsLiked);
 
       const jobData = {
         jobId: params.id,
@@ -128,10 +130,10 @@ const JobDetails = () => {
       };
 
       try {
-        if (newIsLiked && initialLike === 'false') {
-          saveJobToStorage('job_data', jobData);
+        if (newIsLiked) {
+          AsyncStorageManager.appendJobToStorage('job_data', jobData);
         } else {
-          deleteJobFromStorage('job_data');
+          AsyncStorageManager.removeSpecificJobFromStorage('job_data', jobData);
         }
         console.log('Data operation completed successfully');
       } catch (error) {
@@ -140,26 +142,6 @@ const JobDetails = () => {
 
       return newIsLiked;
     });
-  };
-
-  const saveJobToStorage = async (key: string, value: any) => {
-    try {
-      await AsyncStorage.setItem(key, JSON.stringify(value));
-      console.log('Data saved successfully');
-    } catch (error) {
-      console.error('Error saving data:', error);
-      throw error;
-    }
-  };
-
-  const deleteJobFromStorage = async (key: string) => {
-    try {
-      await AsyncStorage.removeItem(key);
-      console.log(`Data with key '${key}' removed successfully`);
-    } catch (error) {
-      console.error(`Error removing data with key '${key}':`, error);
-      throw error;
-    }
   };
 
   return (
@@ -179,8 +161,8 @@ const JobDetails = () => {
           headerRight: () => (
             <ScreenHeaderBtn iconUrl={icons.share} dimension='60%' handlePress={shareText} />
           ),
-          // header: (props) => <ScreenHeader {...props} title="Job Details" />,
-          headerTitle: " Job Details",
+          headerTitle: "Job Details",
+          headerTitleAlign: 'center'
         }}
       />
 
@@ -198,10 +180,10 @@ const JobDetails = () => {
           ) : (
             <View style={{ padding: SIZES.medium, paddingBottom: 100 }}>
               <Company
-                companyLogo={jobDetails[0].employer_logo}
-                jobTitle={jobDetails[0].job_title}
-                companyName={jobDetails[0].employer_name}
-                location={jobDetails[0].job_country}
+                companyLogo={jobDetails[0]?.employer_logo ?? "https://t4.ftcdn.net/jpg/05/05/61/73/360_F_505617309_NN1CW7diNmGXJfMicpY9eXHKV4sqzO5H.jpg"}
+                jobTitle={jobDetails[0]?.job_title}
+                companyName={jobDetails[0]?.employer_name}
+                location={jobDetails[0]?.job_country}
               />
 
               <JobTabs

@@ -4,6 +4,7 @@ import { COLORS, FONT, SIZES, icons } from "../../../constants";
 import { Stack, useRouter, useFocusEffect } from 'expo-router';
 import { ScreenHeaderBtn, LikedJobs } from '../../../components';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorageManager from '../../../components/AsyncStorageManager';
 
 const Liked = () => {
   const router = useRouter();
@@ -11,24 +12,8 @@ const Liked = () => {
   const [likedJobsList, setLikedJobsList] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const getAllItemsFromStorage = async () => {
-    try {
-      const allKeys = await AsyncStorage.getAllKeys();
-      const allItems = await AsyncStorage.multiGet(allKeys);
-
-      // Parse each item's value from JSON
-      const parsedItems = allItems.map(([key, value]) => {
-        return { key, value: JSON.parse(value || 'null') };
-      });
-
-      return parsedItems;
-    } catch (error) {
-      console.error('Error retrieving data:', error);
-    }
-  };
-
   const handleRetrieved = async () => {
-    const retrievedItems = await getAllItemsFromStorage();
+    const retrievedItems = await AsyncStorageManager.getAllItemsFromStorage();
     if (retrievedItems) {
       const LikedJobs = retrievedItems.length > 0;
       if (LikedJobs) {
@@ -61,7 +46,8 @@ const Liked = () => {
               handlePress={() => router.back()}
             />
           ),
-          headerTitle: " Liked Jobs",
+          headerTitle: "Liked Jobs",
+          headerTitleAlign: 'center'
         }}
       />
 

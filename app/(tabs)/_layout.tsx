@@ -1,14 +1,18 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome5';
 import { Ionicons } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Link, Tabs } from 'expo-router';
-import { Pressable, useColorScheme } from 'react-native';
+import { Link, Tabs, useFocusEffect } from 'expo-router';
+import { COLORS, FONT, SIZES } from "../../constants";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useEffect, useState } from 'react';
+import { useIsFocused } from '@react-navigation/native';
+import AsyncStorageManager from '../../components/AsyncStorageManager';
 
-import Colors from '../../constants/Colors';
+type JobObject = {
+  key: string;
+  value: any;
+};
 
-/**
- * You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
- */
 function TabBarIcon(props: {
   name: React.ComponentProps<typeof FontAwesome>['name'];
   color: string;
@@ -18,7 +22,62 @@ function TabBarIcon(props: {
 }
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const [likedJobsList, setLikedJobsList] = useState<any[]>([]);
+  const isFocused = useIsFocused();
+
+  const getAllItemsFromStorage = async () => {
+    try {
+      const allKeys = await AsyncStorage.getAllKeys();
+      const allItems = await AsyncStorage.multiGet(allKeys);
+
+      // Parse each item's value from JSON
+      const parsedItems = allItems.map(([key, value]) => {
+        return { key, value: JSON.parse(value || 'null') };
+      });
+
+      return parsedItems;
+    } catch (error) {
+      console.error('Error retrieving data:', error);
+    }
+  };
+
+  const handleRetrieved = async () => {
+    const retrievedItems = await getAllItemsFromStorage();
+    if (retrievedItems) {
+      const LikedJobs = retrievedItems.length > 0;
+      if (LikedJobs) {
+        setLikedJobsList(retrievedItems)
+      }
+    } else {
+      // console.log('No items retrieved from storage.');
+    }
+  };
+
+  // AsyncStorageManager.addListener('storageChange', handleRetrieved);
+
+  useEffect(() => {
+    if (isFocused) {
+       console.log('In inFocused Block', isFocused);
+       handleRetrieved()
+    }
+  }, [isFocused]);
+
+  function filterJobData(data: JobObject[]): JobObject[] {
+    return data.filter((item) => item.key === "job_data");
+  }
+
+  let jobLikedResult = filterJobData(likedJobsList) || [];
+
+  console.log(likedJobsList, jobLikedResult, 'jobLikedResult')
+
+  let jobLikedResultValue = jobLikedResult.map((item) => {
+    const value = item.value;
+    return value;
+  });
+
+  let likedJobsNo = jobLikedResultValue.flat().length
+
+  console.log(likedJobsNo, 'likedJobsNo')
 
   return (
     <Tabs
@@ -39,7 +98,9 @@ export default function TabLayout() {
         name="liked"
         options={{
           title: 'Like',
-          tabBarIcon: ({ color }) => <TabBarIcon name="heart" solid={true} color={color} />,
+          tabBarIcon: ({ focused, color }) => <TabBarIcon name="heart" solid={true} color={color} />,
+          tabBarBadge: likedJobsNo, ///
+          tabBarBadgeStyle: { backgroundColor: COLORS.tertiary, fontWeight: '600' }
         }}
       />
       <Tabs.Screen

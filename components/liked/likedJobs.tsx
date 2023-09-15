@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from "./likedJobs.style";
 import { COLORS } from "../../constants";
 import LikedJobCard from "../common/cards/liked/likedJobsCard";
+import AsyncStorageManager from "../AsyncStorageManager";
 
 type JobObject = {
     key: string;
@@ -17,24 +18,8 @@ const LikedJobs = ({ focused }: any) => {
     const [error, setError] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
-    const getAllItemsFromStorage = async () => {
-        try {
-            const allKeys = await AsyncStorage.getAllKeys();
-            const allItems = await AsyncStorage.multiGet(allKeys);
-
-            // Parse each item's value from JSON
-            const parsedItems = allItems.map(([key, value]) => {
-                return { key, value: JSON.parse(value || 'null') };
-            });
-
-            return parsedItems;
-        } catch (error) {
-            console.error('Error retrieving data:', error);
-        }
-    };
-
     const handleRetrieved = async () => {
-        const retrievedItems = await getAllItemsFromStorage();
+        const retrievedItems = await AsyncStorageManager.getAllItemsFromStorage();
         if (retrievedItems) {
             const LikedJobs = retrievedItems.length > 0;
             if (LikedJobs) {
@@ -47,19 +32,19 @@ const LikedJobs = ({ focused }: any) => {
         }
     };
 
-    const handleDelete = async () => {
-        const deleteJobFromStorage = async (key: string) => {
-            try {
-                await AsyncStorage.removeItem(key);
-                console.log(`Data with key '${key}' removed successfully`);
-            } catch (error) {
-                console.error(`Error removing data with key '${key}':`, error);
-                throw error;
-            }
-        };
+    // const handleDelete = async () => {
+    //     deleteJobFromStorage('job_data')
+    // }
 
-        deleteJobFromStorage('job_data');
-    };
+    // const deleteJobFromStorage = async (key: string) => {
+    //     try {
+    //         await AsyncStorage.removeItem(key);
+    //         console.log(`Data with key '${key}' removed successfully`);
+    //     } catch (error) {
+    //         console.error(`Error removing data with key '${key}':`, error);
+    //         throw error;
+    //     }
+    // };
 
     useEffect(() => {
         handleRetrieved();
@@ -76,15 +61,11 @@ const LikedJobs = ({ focused }: any) => {
         return value;
     });
 
-    console.log(jobLikedResultValue, 'filteredArray')
+    // console.log(jobLikedResultValue, 'filteredArray')
 
     return (
         <View style={styles.container}>
             <View style={styles.cardsContainer}>
-                <TouchableOpacity onPress={handleRetrieved}>
-                    <Text>Retrieve Data</Text>
-                </TouchableOpacity>
-
                 {/* <TouchableOpacity onPress={handleDelete}>
                     <Text>Remove Data</Text>
                 </TouchableOpacity> */}

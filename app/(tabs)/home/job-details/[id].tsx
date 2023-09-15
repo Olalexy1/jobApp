@@ -22,6 +22,7 @@ import {
 import { COLORS, icons, SIZES } from "../../../../constants";
 import { useGetJobDetailsQuery } from "../../../../services/jobsApi";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorageManager, { AsyncStorageEvent } from "../../../../components/AsyncStorageManager";
 
 const tabs = ["About", "Qualifications", "Responsibilities"];
 
@@ -91,11 +92,11 @@ const JobDetails = () => {
         message: jobLink,
       });
       if (result.action === Share.sharedAction) {
-        if (result.activityType){
+        if (result.activityType) {
           console.log('Shared with activity type of: ', result.activityType)
         } else {
           console.log('Shared successfully');
-        } 
+        }
       } else if (result.action === Share.dismissedAction) {
         console.log('Share dismissed');
       }
@@ -107,7 +108,7 @@ const JobDetails = () => {
   const handleClicked = async () => {
     setIsLiked((prevIsLiked) => {
       const newIsLiked = !prevIsLiked;
-  
+
       const jobData = {
         jobId: params.id,
         jobTitle: jobTitle,
@@ -116,68 +117,29 @@ const JobDetails = () => {
         jobType: jobType,
         liked: true
       };
-  
+
       try {
         if (newIsLiked) {
-          appendJobToStorage('job_data', jobData);
+          AsyncStorageManager.appendJobToStorage('job_data', jobData);
         } else {
-          deleteJobFromStorage('job_data');
+          AsyncStorageManager.removeSpecificJobFromStorage('job_data', jobData);
         }
         console.log('Data operation completed successfully');
       } catch (error) {
         console.error('Error with data operation:', error);
       }
-  
+
       return newIsLiked;
     });
   };
 
-  // const saveJobToStorage = async (key: string, value: any) => {
-  //   try {
-  //     await AsyncStorage.setItem(key, JSON.stringify(value));
-  //     console.log('Data saved successfully');
-  //   } catch (error) {
-  //     console.error('Error saving data:', error);
-  //     throw error;
-  //   }
-  // };
-
-  const appendJobToStorage = async (key: string, value: any) => {
-    try {
-      // Retrieve the existing data from local storage
-      const existingData = await AsyncStorage.getItem(key);
-  
-      // Parse the existing data (or initialize an empty array if it's the first time)
-      let existingArray = existingData ? JSON.parse(existingData) : [];
-  
-      // Check if the existing data is an array; if not, create an array with the existing value
-      if (!Array.isArray(existingArray)) {
-        existingArray = [existingArray];
-      }
-  
-      // Append the new value to the existing array
-      existingArray.push(value);
-  
-      // Save the updated array back to local storage
-      await AsyncStorage.setItem(key, JSON.stringify(existingArray));
-      console.log('Data appended successfully');
-    } catch (error) {
-      console.error('Error appending data:', error);
-      throw error;
-    }
-  };
-  
-
-  const deleteJobFromStorage = async (key: string) => {
-    try {
-      await AsyncStorage.removeItem(key);
-      console.log(`Data with key '${key}' removed successfully`);
-    } catch (error) {
-      console.error(`Error removing data with key '${key}':`, error);
-      throw error;
-    }
+  // Define a callback function that will be executed when the event occurs
+  const handleStorageChange = (event: AsyncStorageEvent) => {
+    console.log(`Storage event occurred for key: ${event.key}, new value: ${event.value}`);
   };
 
+  // Register the callback function to listen for 'storageChange' events
+  AsyncStorageManager.addListener('storageChange', handleStorageChange);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.lightWhite }}>
@@ -208,9 +170,9 @@ const JobDetails = () => {
           {isLoading ? (
             <ActivityIndicator size='large' color={COLORS.primary} />
           ) : error ? (
-            <Text style={{marginHorizontal: 20}}>Something went wrong</Text>
+            <Text style={{ marginHorizontal: 20 }}>Something went wrong</Text>
           ) : jobDetailsData.length === 0 ? (
-            <Text style={{marginHorizontal: 20}}>No data available</Text>
+            <Text style={{ marginHorizontal: 20 }}>No data available</Text>
           ) : (
             <View style={{ padding: SIZES.medium, paddingBottom: 100 }}>
               <Company
@@ -231,7 +193,7 @@ const JobDetails = () => {
           )}
         </ScrollView>
 
-        <JobFooter url={jobDetails[0]?.job_google_link ?? 'https://careers.google.com/jobs/results/'} handlePress={handleClicked} liked={isLiked}/>
+        <JobFooter url={jobDetails[0]?.job_google_link ?? 'https://careers.google.com/jobs/results/'} handlePress={handleClicked} liked={isLiked} />
       </>
     </SafeAreaView>
   );
