@@ -69,6 +69,7 @@ const AsyncStorageManager = {
                 // Remove the object with the specified job ID from the existing array
                 existingArray.splice(index, 1);
                 console.log('Object removed from existing array');
+                AsyncStorageManager.emitEvent('jobAppended', { key, value });
             } else {
                 console.log('Object with jobId not found in existing array');
             }

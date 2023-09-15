@@ -35,28 +35,19 @@ export default function TabLayout() {
         setLikedJobsList(jobDataItems[0].value);
       }
     } else {
-      // Handle the case when no items are retrieved.
+      
     }
   };
 
   useEffect(() => {
     handleRetrieved();
 
-    // Add a listener for changes to the "job_data" key in AsyncStorage.
-    AsyncStorageManager.addListener('jobAppended', (event: AsyncStorageEvent) => {
-      if (event.key === 'jobAppended') {
-        handleRetrieved();
-      }
-    });
+    AsyncStorageManager.addListener('jobAppended', handleRetrieved);
 
-    // Clean up the listener when the component unmounts.
     return () => {
-      AsyncStorageManager.removeListener('jobAppended', (event: AsyncStorageEvent) => {
-        if (event.key === 'jobAppended') {
-          console.log('event cleaned up')
-        }
-      });
+      AsyncStorageManager.removeListener('jobAppended', handleRetrieved);
     };
+
   }, [ ]);
 
   useEffect(() => {
