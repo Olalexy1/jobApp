@@ -1,4 +1,4 @@
-import { Text, View, TextInput, StyleSheet, TouchableOpacity, Image, NativeSyntheticEvent, TextInputChangeEventData } from "react-native";
+import { Text, View, TextInput, StyleSheet, TouchableOpacity, Image, NativeSyntheticEvent, TextInputChangeEventData, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from "react-native";
 import { useRef, useState, ChangeEvent } from "react";
 // import { useAuth } from "../context/auth";
 import { AuthStore, appSignUp } from "../../firebase";
@@ -7,6 +7,8 @@ import { Stack, useRouter } from "expo-router";
 import { COLORS, FONT, SIZES } from "../../constants";
 import { useToast, VStack, HStack, Center, IconButton, CloseIcon, Alert } from 'native-base';
 import { validateEmail } from "../../utils";
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 interface FormData {
   firstName: string;
@@ -38,6 +40,8 @@ export default function CreateAccount() {
 
   const { firstName, lastName, email, password } = formData;
 
+  const [spinner, setSpinner] = useState(false);
+
   const [errors, setErrors] = useState({
     firstName: '',
     lastName: '',
@@ -45,7 +49,7 @@ export default function CreateAccount() {
     password: ''
   });
 
-  const handleChangeInput =  (name: string, e: NativeSyntheticEvent<TextInputChangeEventData>)  => {
+  const handleChangeInput = (name: string, e: NativeSyntheticEvent<TextInputChangeEventData>) => {
     const value = e.nativeEvent.text;
     setFormData({ ...formData, [name]: value });
     setErrors(prevErrors => ({ ...prevErrors, [name]: '' }));
@@ -131,6 +135,7 @@ export default function CreateAccount() {
   const handleSubmit = async () => {
 
     // console.log('formData', formData);
+    setSpinner(true)
 
     if (validateInputs()) {
       const resp = await appSignUp(
@@ -138,7 +143,7 @@ export default function CreateAccount() {
         formData.password,
         formData.firstName + " " + formData.lastName
       );
-
+      setSpinner(false)
       if (resp?.user) {
         setLoading(true);
         toast.show({
@@ -171,129 +176,136 @@ export default function CreateAccount() {
   }
 
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      {/* <Stack.Screen
-        options={{ title: "Create Account", headerLeft: () => <></> }}
-      /> */}
-      <Image
-        style={styles.logo}
-        source={require('../../assets/images/logo.png')}
-      />
-      <View style={styles.innerContainers}>
-        <Input
-          placeholder="Enter First Name"
-          nativeID="firstName"
-          // onChangeText={(text) => {
-          //   firstNameRef.current = text;
-          // }}
-          onChange={(value) => handleChangeInput('firstName', value)}
-          style={styles.textInput}
-          leftIcon={
-            < Icon
-              name='user'
-              solid
-              type="font-awesome-5"
-              color={COLORS.primary}
+    <KeyboardAwareScrollView>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <Spinner
+            visible={spinner}
+          />
+          <Image
+            style={styles.logo}
+            source={require('../../assets/images/logo.png')}
+          />
+          <View style={styles.innerContainers}>
+            <Input
+              placeholder="Enter First Name"
+              nativeID="firstName"
+              // onChangeText={(text) => {
+              //   firstNameRef.current = text;
+              // }}
+              onChange={(value) => handleChangeInput('firstName', value)}
+              style={styles.textInput}
+              leftIcon={
+                < Icon
+                  name='user'
+                  solid
+                  type="font-awesome-5"
+                  color={COLORS.primary}
+                />
+              }
+              errorMessage={errors.firstName}
             />
-          }
-          errorMessage={errors.firstName}
-        />
-      </View>
-      <View style={styles.innerContainers}>
-        <Input
-          placeholder="Enter Last Name"
-          nativeID="lastName"
-          // onChangeText={(text) => {
-          //   lastNameRef.current = text;
-          // }}
-          onChange={(value) => handleChangeInput('lastName', value)}
-          style={styles.textInput}
-          leftIcon={
-            < Icon
-              name='user'
-              solid
-              type="font-awesome-5"
-              color={COLORS.primary}
+          </View>
+          <View style={styles.innerContainers}>
+            <Input
+              placeholder="Enter Last Name"
+              nativeID="lastName"
+              // onChangeText={(text) => {
+              //   lastNameRef.current = text;
+              // }}
+              onChange={(value) => handleChangeInput('lastName', value)}
+              style={styles.textInput}
+              leftIcon={
+                < Icon
+                  name='user'
+                  solid
+                  type="font-awesome-5"
+                  color={COLORS.primary}
+                />
+              }
+              errorMessage={errors.lastName}
             />
-          }
-          errorMessage={errors.lastName}
-        />
-      </View>
-      <View style={styles.innerContainers}>
-        <Input
-          placeholder="Enter Email"
-          autoCapitalize="none"
-          nativeID="email"
-          keyboardType="email-address"
-          // onChangeText={(text) => {
-          //   emailRef.current = text;
-          // }}
-          onChange={(value) => handleChangeInput('email', value)}
-          style={styles.textInput}
-          leftIcon={
-            < Icon
-              name='envelope'
-              solid
-              type="font-awesome-5"
-              color={COLORS.primary}
+          </View>
+          <View style={styles.innerContainers}>
+            <Input
+              placeholder="Enter Email"
+              autoCapitalize="none"
+              nativeID="email"
+              keyboardType="email-address"
+              // onChangeText={(text) => {
+              //   emailRef.current = text;
+              // }}
+              onChange={(value) => handleChangeInput('email', value)}
+              style={styles.textInput}
+              leftIcon={
+                < Icon
+                  name='envelope'
+                  solid
+                  type="font-awesome-5"
+                  color={COLORS.primary}
+                />
+              }
+              errorMessage={errors.email}
             />
-          }
-          errorMessage={errors.email}
-        />
-      </View>
+          </View>
 
-      <View style={styles.innerContainers}>
-        <Input
-          placeholder="Enter Password"
-          secureTextEntry={show ? false : true}
-          nativeID="password"
-          // onChangeText={(text) => {
-          //   passwordRef.current = text;
-          // }}
-          onChange={(value) => handleChangeInput('password', value)}
-          style={styles.textInput}
-          leftIcon={
-            < Icon
-              name='lock'
-              solid
-              type="font-awesome-5"
-              color={COLORS.primary}
+          <View style={styles.innerContainers}>
+            <Input
+              placeholder="Enter Password"
+              secureTextEntry={show ? false : true}
+              nativeID="password"
+              // onChangeText={(text) => {
+              //   passwordRef.current = text;
+              // }}
+              onChange={(value) => handleChangeInput('password', value)}
+              style={styles.textInput}
+              leftIcon={
+                < Icon
+                  name='lock'
+                  solid
+                  type="font-awesome-5"
+                  color={COLORS.primary}
+                />
+              }
+              rightIcon={
+                < Icon
+                  name={show ? 'eye' : 'eye-slash'}
+                  type="font-awesome-5"
+                  size={24}
+                  color={COLORS.primary}
+                  onPress={handleClick}
+                />
+              }
+              errorMessage={errors.password}
             />
-          }
-          rightIcon={
-            < Icon
-              name={show ? 'eye' : 'eye-slash'}
-              type="font-awesome-5"
-              size={24}
-              color={COLORS.primary}
-              onPress={handleClick}
-            />
-          }
-          errorMessage={errors.password}
-        />
-      </View>
+          </View>
 
-      <TouchableOpacity
-        style={styles.signBtn}
-        onPress={handleSubmit}
-      >
-        <Text style={styles.signBtnText}>Create An Account</Text>
-      </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.signBtn}
+            onPress={handleSubmit}
+          >
+            <Text style={styles.signBtnText}>Create An Account</Text>
+          </TouchableOpacity>
 
-      <Text style={{ color: COLORS.secondary, fontWeight: '600' }}>
-        Already have an Account?
-        <Text
-          style={{ color: '#407BFF' }}
-          onPress={() => {
-            router.push("/login");
-          }}
-        > Sign In</Text>
-      </Text>
-    </View>
+          <Text style={{ color: COLORS.secondary, fontWeight: '600' }}>
+            Already have an Account?
+            <Text
+              style={{ color: '#407BFF' }}
+              onPress={() => {
+                router.push("/login");
+              }}
+            > Sign In</Text>
+          </Text>
+        </View>
+      </TouchableWithoutFeedback>
+    </KeyboardAwareScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   innerContainers: {
     width: '85%',
   },

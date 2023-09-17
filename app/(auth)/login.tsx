@@ -1,4 +1,4 @@
-import { Text, View, TextInput, StyleSheet, TouchableOpacity, Image, NativeSyntheticEvent, TextInputChangeEventData } from "react-native";
+import { Text, View, TextInput, StyleSheet, TouchableOpacity, Image, NativeSyntheticEvent, TextInputChangeEventData, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import { Input, Icon } from '@rneui/themed';
@@ -6,6 +6,7 @@ import { AuthStore, appSignIn } from "../../firebase";
 import { COLORS, FONT, SIZES } from "../../constants";
 import { validateEmail } from "../../utils";
 import { useToast, VStack, HStack, Center, IconButton, CloseIcon, Alert } from 'native-base';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 interface FormData {
   email: string;
@@ -29,6 +30,8 @@ export default function Login() {
   const toast = useToast();
 
   const [formData, setFormData] = useState<FormData>({ email: '', password: '' });
+
+  const [spinner, setSpinner] = useState(false);
 
   const { email, password } = formData;
 
@@ -109,8 +112,10 @@ export default function Login() {
   };
 
   const handleSubmit = async () => {
+    setSpinner(true)
     if (validateInputs()) {
       const resp = await appSignIn(formData.email, formData.password);
+      setSpinner(false)
       if (resp?.user) {
         router.replace("/");
       } else {
@@ -128,84 +133,95 @@ export default function Login() {
   }
 
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center", width: '100%' }}>
-
-      <Image
-        style={styles.logo}
-        source={require('../../assets/images/logo.png')}
-      />
-      <View style={styles.innerContainers}>
-        <Input
-          placeholder="Enter Email"
-          autoCapitalize="none"
-          nativeID="email"
-          onChangeText={(text) => {
-            emailRef.current = text;
-          }}
-          onChange={(value) => handleChangeInput('email', value)}
-          style={styles.textInput}
-          leftIcon={
-            < Icon
-              name='user'
-              solid
-              type="font-awesome-5"
-              color={COLORS.primary}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", width: '100%' }}>
+          <Spinner
+            visible={spinner}
+          />
+          <Image
+            style={styles.logo}
+            source={require('../../assets/images/logo.png')}
+          />
+          <View style={styles.innerContainers}>
+            <Input
+              placeholder="Enter Email"
+              autoCapitalize="none"
+              nativeID="email"
+              onChangeText={(text) => {
+                emailRef.current = text;
+              }}
+              onChange={(value) => handleChangeInput('email', value)}
+              style={styles.textInput}
+              leftIcon={
+                < Icon
+                  name='user'
+                  solid
+                  type="font-awesome-5"
+                  color={COLORS.primary}
+                />
+              }
+              errorMessage={errors.email}
             />
-          }
-          errorMessage={errors.email}
-        />
-      </View>
+          </View>
 
 
-      <View style={styles.innerContainers}>
-        <Input
-          placeholder="Enter Password"
-          secureTextEntry={show ? false : true}
-          nativeID="password"
-          onChangeText={(text) => {
-            passwordRef.current = text;
-          }}
-          onChange={(value) => handleChangeInput('password', value)}
-          style={styles.textInput}
-          leftIcon={
-            < Icon
-              name='lock'
-              solid
-              type="font-awesome-5"
-              color={COLORS.primary}
+          <View style={styles.innerContainers}>
+            <Input
+              placeholder="Enter Password"
+              secureTextEntry={show ? false : true}
+              nativeID="password"
+              onChangeText={(text) => {
+                passwordRef.current = text;
+              }}
+              onChange={(value) => handleChangeInput('password', value)}
+              style={styles.textInput}
+              leftIcon={
+                < Icon
+                  name='lock'
+                  solid
+                  type="font-awesome-5"
+                  color={COLORS.primary}
+                />
+              }
+              rightIcon={
+                < Icon
+                  name={show ? 'eye' : 'eye-slash'}
+                  type="font-awesome-5"
+                  size={24}
+                  color={COLORS.primary}
+                  onPress={handleClick}
+                />
+              }
+              errorMessage={errors.password}
             />
-          }
-          rightIcon={
-            < Icon
-              name={show ? 'eye' : 'eye-slash'}
-              type="font-awesome-5"
-              size={24}
-              color={COLORS.primary}
-              onPress={handleClick}
-            />
-          }
-          errorMessage={errors.password}
-        />
-      </View>
-      <TouchableOpacity style={styles.loginBtn}
-        onPress={handleSubmit}
-      >
-        <Text style={styles.loginBtnText}>Login</Text>
-      </TouchableOpacity>
-      <Text style={{ color: COLORS.secondary, fontWeight: '600' }}>
-        Don't have an Account?
-        <Text
-          style={{ color: '#407BFF' }}
-          onPress={() => {
-            router.push("/create-account");
-          }}
-        > Sign Up</Text>
-      </Text>
-    </View>
+          </View>
+          <TouchableOpacity style={styles.loginBtn}
+            onPress={handleSubmit}
+          >
+            <Text style={styles.loginBtnText}>Login</Text>
+          </TouchableOpacity>
+          <Text style={{ color: COLORS.secondary, fontWeight: '600' }}>
+            Don't have an Account?
+            <Text
+              style={{ color: '#407BFF' }}
+              onPress={() => {
+                router.push("/create-account");
+              }}
+            > Sign Up</Text>
+          </Text>
+        </View>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   innerContainers: {
     width: '85%',
   },
