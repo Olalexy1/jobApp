@@ -189,7 +189,7 @@ export default function CreateAccount() {
   }
 
   return (
-    <KeyboardAwareScrollView contentContainerStyle={styles.container}>
+    <KeyboardAwareScrollView contentContainerStyle={styles.container} enableAutomaticScroll={true} enableOnAndroid={true}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
           <Spinner
