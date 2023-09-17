@@ -298,14 +298,46 @@ function calculateDestinationCoordinates(lat: number, lon: number, distanceKm: n
 
 const validateEmail = (email: string) => {
   return email.match(
-      /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
   );
 };
+
+
+const checkPasswordStrength = (password: string) => {
+
+  const passwordSpecialChars = /[!@#$%^&*()_+{}\[\]:;<>,.?~\\-]/;
+
+  // Define criteria for password strength
+  const minLength = 8;
+  const hasUpperCase = /[A-Z]/.test(password);
+  const hasLowerCase = /[a-z]/.test(password);
+  const hasNumbers = /[0-9]/.test(password);
+  const hasSpecialChars = passwordSpecialChars.test(password);
+
+  // Calculate the total score based on criteria
+  let score = 0;
+  if (password.length >= minLength) score++;
+  if (hasUpperCase) score++;
+  if (hasLowerCase) score++;
+  if (hasNumbers) score++;
+  if (hasSpecialChars) score++;
+
+  // Determine the strength based on the score
+  if (score === 5) {
+    return 'Strong';
+  // } else if (score >= 3) {
+  //   return 'Moderate';
+  } else {
+    return 'Weak';
+  }
+}
+
 
 export {
   checkImageURL,
   countryNameToCodeMap,
   calculateDestinationCoordinates,
   avatarLetters,
-  validateEmail
+  validateEmail,
+  checkPasswordStrength
 }

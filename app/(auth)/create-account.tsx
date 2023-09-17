@@ -6,7 +6,7 @@ import { Input, Icon } from '@rneui/themed';
 import { Stack, useRouter } from "expo-router";
 import { COLORS, FONT, SIZES } from "../../constants";
 import { useToast, VStack, HStack, Center, IconButton, CloseIcon, Alert } from 'native-base';
-import { validateEmail } from "../../utils";
+import { checkPasswordStrength, validateEmail } from "../../utils";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Spinner from 'react-native-loading-spinner-overlay';
 
@@ -15,6 +15,7 @@ interface FormData {
   lastName: string;
   email: string;
   password: string;
+  confirmPassword: string;
 }
 
 interface ToastItem {
@@ -33,12 +34,14 @@ export default function CreateAccount() {
   // const passwordRef = useRef("");
   const [show, setShow] = useState(false);
   const handleClick = () => setShow(!show);
+  const [showTwo, setShowTwo] = useState(false);
+  const handleClickTwo = () => setShowTwo(!showTwo);
   const [isLoading, setLoading] = useState(false);
   const toast = useToast();
 
-  const [formData, setFormData] = useState<FormData>({ firstName: '', lastName: '', email: '', password: '' });
+  const [formData, setFormData] = useState<FormData>({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' });
 
-  const { firstName, lastName, email, password } = formData;
+  const { firstName, lastName, email, password, confirmPassword } = formData;
 
   const [spinner, setSpinner] = useState(false);
 
@@ -46,7 +49,8 @@ export default function CreateAccount() {
     firstName: '',
     lastName: '',
     email: '',
-    password: ''
+    password: '',
+    confirmPassword: '',
   });
 
   const handleChangeInput = (name: string, e: NativeSyntheticEvent<TextInputChangeEventData>) => {
@@ -102,7 +106,7 @@ export default function CreateAccount() {
 
   const validateInputs = () => {
     let validationPassed = true;
-    const newErrors = { firstName: '', lastName: '', email: '', password: '' };
+    const newErrors = { firstName: '', lastName: '', email: '', password: '', confirmPassword: '' };
 
     if (!firstName.trim()) {
       newErrors.firstName = 'First name is required';
@@ -125,6 +129,17 @@ export default function CreateAccount() {
     if (!password.trim()) {
       newErrors.password = 'Password is required';
       validationPassed = false;
+    } else if (checkPasswordStrength(password) === 'Weak') {
+      newErrors.password = 'Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character';
+      validationPassed = false;
+    }
+
+    if (!confirmPassword.trim()) {
+      newErrors.confirmPassword = 'Password is required';
+      validationPassed = false;
+    } else if (confirmPassword !== password) {
+      newErrors.confirmPassword = 'Passwords do not match. Please double-check';
+      validationPassed = false;
     }
 
     setErrors(newErrors);
@@ -134,10 +149,8 @@ export default function CreateAccount() {
 
   const handleSubmit = async () => {
 
-    // console.log('formData', formData);
-    setSpinner(true)
-
     if (validateInputs()) {
+      setSpinner(true)
       const resp = await appSignUp(
         formData.email,
         formData.password,
@@ -176,7 +189,7 @@ export default function CreateAccount() {
   }
 
   return (
-    <KeyboardAwareScrollView>
+    <KeyboardAwareScrollView contentContainerStyle={styles.container}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
           <Spinner
@@ -277,6 +290,37 @@ export default function CreateAccount() {
                 />
               }
               errorMessage={errors.password}
+            />
+          </View>
+
+          <View style={styles.innerContainers}>
+            <Input
+              placeholder="Confirm Password"
+              secureTextEntry={showTwo ? false : true}
+              nativeID="confirmPassword"
+              // onChangeText={(text) => {
+              //   passwordRef.current = text;
+              // }}
+              onChange={(value) => handleChangeInput('confirmPassword', value)}
+              style={styles.textInput}
+              leftIcon={
+                < Icon
+                  name='lock'
+                  solid
+                  type="font-awesome-5"
+                  color={COLORS.primary}
+                />
+              }
+              rightIcon={
+                < Icon
+                  name={showTwo ? 'eye' : 'eye-slash'}
+                  type="font-awesome-5"
+                  size={24}
+                  color={COLORS.primary}
+                  onPress={handleClickTwo}
+                />
+              }
+              errorMessage={errors.confirmPassword}
             />
           </View>
 

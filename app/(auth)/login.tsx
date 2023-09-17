@@ -112,8 +112,8 @@ export default function Login() {
   };
 
   const handleSubmit = async () => {
-    setSpinner(true)
     if (validateInputs()) {
+      setSpinner(true)
       const resp = await appSignIn(formData.email, formData.password);
       setSpinner(false)
       if (resp?.user) {
