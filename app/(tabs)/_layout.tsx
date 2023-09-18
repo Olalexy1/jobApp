@@ -7,6 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
 import { useIsFocused } from '@react-navigation/native';
 import AsyncStorageManager, { AsyncStorageEvent } from '../../components/AsyncStorageManager';
+import { Dimensions, View } from 'react-native';
 
 type JobObject = {
   key: string;
@@ -20,6 +21,8 @@ function TabBarIcon(props: {
 }) {
   return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
 }
+
+const { width, height } = Dimensions.get("window")
 
 export default function TabLayout() {
   const [likedJobsList, setLikedJobsList] = useState<any[]>([]);
@@ -48,7 +51,7 @@ export default function TabLayout() {
       AsyncStorageManager.removeListener('jobAppended', handleRetrieved);
     };
 
-  }, [ ]);
+  }, []);
 
   useEffect(() => {
     setLikedJobsNo(jobLikedResultValue.length);
@@ -64,36 +67,37 @@ export default function TabLayout() {
   });
 
   return (
-    <Tabs
-      initialRouteName='home'
-      screenOptions={{
-        tabBarActiveTintColor: "#407BFF",
-        tabBarShowLabel: false,
-        headerShown: false
-      }}>
-      <Tabs.Screen
-        name="home"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="liked"
-        options={{
-          title: 'Like',
-          tabBarIcon: ({ focused, color }) => <TabBarIcon name="heart" solid={true} color={color} />,
-          tabBarBadge: likedJobsNo, ///
-          tabBarBadgeStyle: { backgroundColor: COLORS.tertiary, fontWeight: '600' }
-        }}
-      />
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: 'Settings',
-          tabBarIcon: ({ color }) => <Ionicons name="settings" size={28} color={color} />,
-        }}
-      />
-    </Tabs>
+      <Tabs
+        initialRouteName='home'
+        screenOptions={{
+          tabBarActiveTintColor: "#407BFF",
+          tabBarShowLabel: false,
+          headerShown: false,
+          tabBarHideOnKeyboard: true
+        }}>
+        <Tabs.Screen
+          name="home"
+          options={{
+            title: 'Home',
+            tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
+          }}
+        />
+        <Tabs.Screen
+          name="liked"
+          options={{
+            title: 'Like',
+            tabBarIcon: ({ focused, color }) => <TabBarIcon name="heart" solid={true} color={color} />,
+            tabBarBadge: likedJobsNo, ///
+            tabBarBadgeStyle: { backgroundColor: COLORS.tertiary, fontWeight: '600' }
+          }}
+        />
+        <Tabs.Screen
+          name="settings"
+          options={{
+            title: 'Settings',
+            tabBarIcon: ({ color }) => <Ionicons name="settings" size={28} color={color} />,
+          }}
+        />
+      </Tabs>
   );
 }

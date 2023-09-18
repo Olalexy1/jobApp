@@ -48,15 +48,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.lightWhite,
-    ...Platform.select({
-      android: {
-        paddingTop: 25, 
-      },
-    }),
   },
   scrollInnerContainer: {
     flex: 1,
-    padding: SIZES.medium
+    padding: SIZES.medium,
+    ...Platform.select({
+      android: {
+        paddingTop: 45, 
+        // borderWidth: 1,
+        // borderColor: 'red'
+      },
+    }),
   }
 });
 
