@@ -189,7 +189,14 @@ export default function CreateAccount() {
   }
 
   return (
-    <KeyboardAwareScrollView contentContainerStyle={styles.container} enableAutomaticScroll={true} enableOnAndroid={true}>
+    <KeyboardAwareScrollView contentContainerStyle={styles.container}
+      enableOnAndroid={true}
+      enableAutomaticScroll={(Platform.OS === 'ios')}
+      // extraScrollHeight={50} 
+      // extraHeight={130}
+      keyboardShouldPersistTaps='handled'
+      showsVerticalScrollIndicator={false}
+    >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
           <Spinner
@@ -348,7 +355,9 @@ export default function CreateAccount() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
+    // borderWidth: 3,
+    // borderColor: 'red',
   },
   innerContainers: {
     width: '85%',

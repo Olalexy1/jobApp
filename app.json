@@ -22,7 +22,12 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        // "foregroundImage": "./assets/noImg.png",
+        "backgroundColor": "#ffffff",
+        "androidStatusBar": {
+          "backgroundColor": "#000000"
+        },
+        "softwareKeyboardLayoutMode": "pan"
       },
       "permissions": [
         "android.permission.ACCESS_COARSE_LOCATION",
@@ -42,6 +47,12 @@
         "expo-location",
         {
           "locationAlwaysAndWhenInUsePermission": "Allow $(jobApp) to use your location."
+        }
+      ],
+      [
+        "./plugins/withAndroidMainActivityAttributes",
+        {
+          "android:windowSoftInputMode" : "adjustPan"
         }
       ]
     ],
