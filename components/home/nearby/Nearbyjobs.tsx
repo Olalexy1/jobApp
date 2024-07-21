@@ -36,7 +36,7 @@ const NearByJobs = () => {
       setLocation(location);
 
       // Fetch country information using reverse geocoding
-      const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${location.coords.latitude},${location.coords.longitude}&key=AIzaSyD5lUokXK7izSWBI_mfTClS5jYaMLr6YK8`);
+      const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${location.coords.latitude},${location.coords.longitude}&key=${GOOGLE_MAPS_API_KEY}`);
       const data = await response.json();
 
       if (data.results.length > 0) {
